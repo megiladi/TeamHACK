@@ -11,6 +11,7 @@ venv/
 # IDE
 .vscode/
 .idea/
+idea/
 
 # Environment variables
 .env
@@ -30,4 +31,6 @@ build/
 # OS-specific
 .DS_Store
 Thumbs.db
+desktop.ini
+
 
