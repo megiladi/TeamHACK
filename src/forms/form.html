@@ -1074,17 +1074,41 @@
         }
 
         // Event listener for form submission
-        document.getElementById('teamHackForm').addEventListener('submit', function(event) {
-            if (!validateAllRankings()) {
-                event.preventDefault();
-                alert('Please fix the duplicate rankings before submitting the form.');
-                return;
-            }
+    document.getElementById('teamHackForm').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-            event.preventDefault();
-            // Add form submission logic here
-            alert('Form submitted! (This is a demo - no data is actually sent)');
+        if (!validateAllRankings()) {
+            alert('Please fix the duplicate rankings before submitting the form.');
+            return;
+        }
+
+        // Get the form data
+        const formData = new FormData(this);
+
+        // Add user_id (in a real app, this would come from authentication)
+        // For testing, you can hardcode a user ID that exists in your database
+        formData.append('user_id', '1');
+
+        // Submit the form via AJAX
+        fetch('/completed_forms', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+            } else {
+                alert('Form submitted successfully!');
+                // Optional: Redirect to another page
+                // window.location.href = '/forms';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting the form.');
         });
+    });
     </script>
 </body>
 </html>

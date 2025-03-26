@@ -74,9 +74,11 @@ def test_get_forms_by_user(client):
     assert response.status_code in [200, 404]  # 404 if no forms yet, 200 if forms exist
 
 
-def test_delete_completed_form(client):
+def test_delete_user_form(client):
+    """Test deleting a form with username + form ID authentication"""
     # First, create a user and a form
-    user_response = client.post('/users', json={'username': 'delete_user', 'email': 'delete@example.com'})
+    username = 'delete_user'
+    user_response = client.post('/users', json={'username': username, 'email': 'delete@example.com'})
     user_id = user_response.json['id']
 
     form_data = {
@@ -86,10 +88,48 @@ def test_delete_completed_form(client):
     form_response = client.post('/completed_forms', data=form_data)
     form_id = form_response.json['id']
 
-    # Now delete the form
-    response = client.delete(f'/completed_forms/{form_id}')
+    # Now delete the form using username + form ID
+    response = client.delete(f'/completed_forms/user/{username}/{form_id}')
     assert response.status_code == 200
-    assert 'Form deleted' in response.json['message']
+    assert 'deleted successfully' in response.json['message']
+
+    # Verify deletion by trying to retrieve all forms for the user
+    get_response = client.get(f'/forms/user/{username}')
+    assert get_response.status_code in [404, 200]  # Either no forms found (404) or empty list (200)
+
+    # Add test for unauthorized deletion (wrong username)
+    # First create a second user and try to delete the first user's form
+    client.post('/users', json={'username': 'another_user', 'email': 'another@example.com'})
+
+    # Create another form for the original user
+    form_data2 = {
+        'user_id': user_id,
+        'question1': 'Another form',
+    }
+    form_response2 = client.post('/completed_forms', data=form_data2)
+    form_id2 = form_response2.json['id']
+
+    # Try to delete with wrong username
+    unauthorized_response = client.delete(f'/completed_forms/user/another_user/{form_id2}')
+    assert unauthorized_response.status_code == 403  # Forbidden
+    assert 'does not belong to' in unauthorized_response.json['error']
+
+def test_create_completed_form_missing_user_id(client):
+    """Test form submission with missing user_id."""
+    form_data = {
+        # No user_id provided
+        'question1': 'Answer 1'
+    }
+    response = client.post('/completed_forms', data=form_data)
+    assert response.status_code == 400
+    assert 'Missing required field' in response.json['error']
+
+def test_get_nonexistent_form(client):
+    """Test retrieving a form that doesn't exist."""
+    response = client.get('/forms/user/nonexistent_user')
+    assert response.status_code == 404
+    assert 'nonexistent_user' in response.json['error']
+    assert 'not found' in response.json['error']
 
 # Comparisons
 
