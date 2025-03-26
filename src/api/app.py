@@ -5,10 +5,11 @@ from src.models.comparison import Comparison
 from src.db.db_setup import Session
 
 # Initialize Flask application
-app = Flask(__name__)
+app = Flask(__name__, template_folder='src/forms')
 
-
+# --------------------------
 # User routes
+# --------------------------
 
 # POST user
 
@@ -56,8 +57,21 @@ def get_users():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+# --------------------------
+# Form routes
+# --------------------------
 
-# CompletedForm routes
+# GET form to fill
+
+@app.route('/fill_form', methods=['GET'])
+def fill_form():
+    """
+    Render the form template for users to fill out.
+
+    Returns:
+    - HTML page with the form
+    """
+    return render_template('form.html')
 
 # POST form
 
@@ -66,27 +80,25 @@ def create_completed_form():
     """
     Create a new completed form.
 
-    Expects JSON payload with:
-    - user_id: int
-    - content: string (JSON format)
+    Expects form data with all fields from the questionnaire
 
     Returns:
     - JSON with form ID and success message
     - HTTP 201 on success, 400 on error
     """
-    data = request.json
-    new_form = CompletedForm(user_id=data['user_id'], content=data['content'])
+    data = request.form.to_dict()
+    new_form = CompletedForm(user_id=data.get('user_id'), content=data)
 
     with Session() as session:
         try:
             session.add(new_form)
             session.commit()
-            return jsonify({"message": "Form created", "id": new_form.id}), 201
+            return jsonify({"message": "Form submitted successfully", "id": new_form.id}), 201
         except Exception as e:
             session.rollback()
             return jsonify({"error": str(e)}), 400
 
-# GET form
+# GET completed forms
 
 @app.route('/completed_forms', methods=['GET'])
 def get_completed_forms():
@@ -102,6 +114,34 @@ def get_completed_forms():
             forms = session.query(CompletedForm).all()
             form_list = [{"id": f.id, "user_id": f.user_id, "content": f.content} for f in forms]
             return jsonify(form_list), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+# GET completed form by username
+
+@app.route('/forms/user/<string:username>', methods=['GET'])
+def get_forms_by_user(username):
+    """
+    Retrieve all forms submitted by a specific user.
+
+    Path parameter:
+    - username: string
+
+    Returns:
+    - JSON list of all forms tied to the user
+    - HTTP 200 on success, 404 if no forms found
+    """
+    with Session() as session:
+        try:
+            user = session.query(User).filter_by(username=username).first()
+            if not user:
+                return jsonify({"error": "User not found"}), 404
+
+            forms = session.query(CompletedForm).filter_by(user_id=user.id).all()
+            if not forms:
+                return jsonify({"error": "No forms found for this user"}), 404
+
+            return jsonify([{"id": f.id, "content": f.content} for f in forms]), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -132,7 +172,9 @@ def delete_completed_form(form_id):
             return jsonify({"error": str(e)}), 500
 
 
+# --------------------------
 # Comparison routes
+# --------------------------
 
 # POST comparison
 
@@ -182,6 +224,9 @@ def get_comparisons():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+# --------------------------
+# Main
+# --------------------------
 
 if __name__ == '__main__':
     app.run(debug=True)
