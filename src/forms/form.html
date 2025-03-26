@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamHACK Form</title>
+    <!-- Bootstrap CSS for responsive styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Using system fonts similar to the original document */
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .likert-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+
+        .likert-option {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        .likert-label-left {
+            width: 200px;
+            text-align: right;
+            padding-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .likert-label-right {
+            width: 200px;
+            text-align: left;
+            padding-left: 20px;
+            flex-shrink: 0;
+        }
+
+        .likert-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex: 0 0 120px;
+        }
+
+        .section-header {
+            background-color: #e0e0e0;
+            padding: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .subsection-header {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .form-label {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: normal;
+        }
+
+        .form-control {
+            margin-bottom: 2.5rem;
+            resize: vertical;
+            min-height: 80px;
+            width: 100%;
+        }
+
+        h3 {
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        .ranking-section {
+            margin-bottom: 2rem;
+        }
+
+        .ranking-title {
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .form-requirements {
+            background-color: #fffaed;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ffe8a1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for the form -->
+    <div class="container mt-5 mb-5">
+        <h1 class="mb-4">TeamHACK Form</h1>
+
+        <!-- Introduction Section -->
+        <div class="mb-4">
+            <h2>Introduction</h2>
+            <p>This form is designed to help team members understand each other better. It is not a replacement for empathy and listening but serves as a starting point for building stronger working relationships.</p>
+
+            <div class="alert alert-info">
+                <p><strong>For Writer:</strong> Some of this might seem redundant; either do all or choose one category (or parts of each) that covers what you believe is most important to get right about you. Also, feel free to add anything that isn't in the template; the goal is to make it easy to understand you, not to have you fill out a form 😊</p>
+                <p><strong>For Readers:</strong> If anything here doesn't match what you're experiencing working with me, please let me know so that I can either make sense of it or you can help me learn more about myself!</p>
+                <p><strong>Note:</strong> If reading a ranking of 1-X, 1 is most important and X is least.</p>
+            </div>
+
+            <div class="form-requirements">
+                <p><strong>Form Requirements:</strong> All fields are required unless marked as <em>(optional)</em>.</p>
+            </div>
+
+        </div>
+
+        <!-- Start of Form -->
+        <form id="teamHackForm">
+
+            <!-- My Best Working Self Section -->
+            <div class="section-header">
+                <h2>My Best Working Self at a Glance</h2>
+                <p>Assume this is talking about you at work on your best day; you can talk about how you show up when you need more support (which is ok!) or outside of work in the sections below.</p>
+            </div>
+
+            <div class="mb-4 mt-4">
+                <h3>Timing</h3>
+
+                <!-- Likert Scales - All Radio Buttons -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Early Bird</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="timing_preference_1" name="timing_preference" value="1" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="timing_preference_2" name="timing_preference" value="2" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="timing_preference_3" name="timing_preference" value="3" required>
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Night Owl</div>
+                </div>
+
+                <!-- Set Working Hours vs Flexible Hours Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Set Working Hours</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="working_hours_1" name="working_hours" value="1" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="working_hours_2" name="working_hours" value="2" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="working_hours_3" name="working_hours" value="3" required>
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Flexible Working Hours</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h3>Relaxing & Brainstorming</h3>
+
+                <!-- Relax Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Relax with Others</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="relax_preference_1" name="relax_preference" value="1" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="relax_preference_2" name="relax_preference" value="2" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="relax_preference_3" name="relax_preference" value="3" required>
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Relax Alone</div>
+                </div>
+
+                <!-- Brainstorming Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Think Together (External Processor)</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="brainstorming_preference_1" name="brainstorming_preference" value="1" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="brainstorming_preference_2" name="brainstorming_preference" value="2" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="brainstorming_preference_3" name="brainstorming_preference" value="3" required>
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Think Alone (Internal Processor)</div>
+                </div>
+
+                <!-- Feeling Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Process What Happened with You</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="feeling_preference_1" name="feeling_preference" value="1" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="feeling_preference_2" name="feeling_preference" value="2" required>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="feeling_preference_3" name="feeling_preference" value="3" required>
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Move On</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h3>Chatting & Communication</h3>
+
+                <!-- Chat Scheduling Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Schedule to Chat</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="chat_scheduling_1" name="chat_scheduling" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="chat_scheduling_2" name="chat_scheduling" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="chat_scheduling_3" name="chat_scheduling" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Interrupt (I Welcome It!)</div>
+                </div>
+
+                <!-- Communication Medium Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Video Chat/Call</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="communication_medium_1" name="communication_medium" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="communication_medium_2" name="communication_medium" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="communication_medium_3" name="communication_medium" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Slack/Text</div>
+                </div>
+
+                <!-- Updating Style Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">When Updating, Tell Story</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="updating_style_1" name="updating_style" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="updating_style_2" name="updating_style" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="updating_style_3" name="updating_style" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">When Updating, Cut to the Chase</div>
+                </div>
+
+                <!-- Asking Style Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">When Asking, Give Me All the Context</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="asking_style_1" name="asking_style" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="asking_style_2" name="asking_style" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="asking_style_3" name="asking_style" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">When Asking, Just Tell Me What You Need</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h3>Building & Praise</h3>
+
+                <!-- Building Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Ship It and Learn</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="building_preference_1" name="building_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="building_preference_2" name="building_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="building_preference_3" name="building_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Learn and then Ship It</div>
+                </div>
+
+                <!-- Praise Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Private Praise</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="praise_preference_1" name="praise_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="praise_preference_2" name="praise_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="praise_preference_3" name="praise_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Public Praise</div>
+                </div>
+            </div>
+
+            <!-- The Culture I Come From Section -->
+            <div class="section-header">
+                <h2>The Culture I Come From</h2>
+                <p>While we strive to have a unified culture, we can't pretend we didn't come from somewhere else that may be similar or different; it can help to share where we come from so people understand where we are now.</p>
+            </div>
+
+            <div class="mb-4 mt-4">
+                <h3>Communication & Thinking</h3>
+
+                <!-- Speaking Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">If I don't say it, don't assume it</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="speaking_preference_1" name="speaking_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="speaking_preference_2" name="speaking_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="speaking_preference_3" name="speaking_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Read the subtext</div>
+                </div>
+
+                <!-- Listening Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Take literally</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="listening_preference_1" name="listening_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="listening_preference_2" name="listening_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="listening_preference_3" name="listening_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">With grain of salt</div>
+                </div>
+
+                <!-- Tough News Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Be direct</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="tough_news_preference_1" name="tough_news_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="tough_news_preference_2" name="tough_news_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="tough_news_preference_3" name="tough_news_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Hint gently</div>
+                </div>
+
+                <!-- Thinking Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Theory first (Deduction)</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="thinking_preference_1" name="thinking_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="thinking_preference_2" name="thinking_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="thinking_preference_3" name="thinking_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Example first (Induction)</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h3>Work & Decision-Making</h3>
+
+                <!-- Orientation Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Journey (Experience)</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="orientation_preference_1" name="orientation_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="orientation_preference_2" name="orientation_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="orientation_preference_3" name="orientation_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Destination (Accomplish)</div>
+                </div>
+
+                <!-- Leading Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Servant Leadership (Flipped Pyramid / Flat)</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="leading_preference_1" name="leading_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="leading_preference_2" name="leading_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="leading_preference_3" name="leading_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Authority Leadership (Typical Pyramid / Top-Down)</div>
+                </div>
+
+                <!-- Deciding Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Group</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="deciding_preference_1" name="deciding_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="deciding_preference_2" name="deciding_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="deciding_preference_3" name="deciding_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Leader</div>
+                </div>
+
+                <!-- Trusting Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Performance</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="trusting_preference_1" name="trusting_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="trusting_preference_2" name="trusting_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="trusting_preference_3" name="trusting_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Relationship</div>
+                </div>
+
+                <!-- Disagreeing Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Embrace/Confront</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="disagreeing_preference_1" name="disagreeing_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="disagreeing_preference_2" name="disagreeing_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="disagreeing_preference_3" name="disagreeing_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Avoid</div>
+                </div>
+
+                <!-- Scheduling Preference Likert Scale -->
+                <div class="likert-container">
+                    <div class="likert-label-left">Plan and Execute</div>
+                    <div class="likert-options">
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="scheduling_preference_1" name="scheduling_preference" value="1">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="scheduling_preference_2" name="scheduling_preference" value="2">
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" class="form-check-input" id="scheduling_preference_3" name="scheduling_preference" value="3">
+                        </div>
+                    </div>
+                    <div class="likert-label-right">Plan but Be Flexible</div>
+                </div>
+            </div>
+
+            <!-- Open-Ended Detail Section -->
+            <div class="section-header">
+                <h2>Open-Ended Detail</h2>
+                <p>Brief, honest, and concrete (where appropriate) 🙂 This is intentionally broad and vague; where you choose to take the questions says just as much as what you actually say!</p>
+            </div>
+
+            <!-- Me Section Header -->
+            <div class="subsection-header">
+                <h2>About Me</h2>
+            </div>
+
+            <!-- Goals and Motivations -->
+            <h3>Goals and Motivations</h3>
+
+            <div class="mb-4">
+                <label for="professional_goals" class="form-label">My current professional goals</label>
+                <textarea class="form-control" id="professional_goals" name="professional_goals" rows="3" placeholder="Share your professional goals here" required></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="motivations" class="form-label">What motivates me in my work</label>
+                <textarea class="form-control" id="motivations" name="motivations" rows="3" placeholder="Describe what motivates you" required></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="success_definition" class="form-label">How I define success</label>
+                <textarea class="form-control" id="success_definition" name="success_definition" rows="3" placeholder="Share your definition of success" required></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="work_life_balance" class="form-label">How work-life balance factors into my approach</label>
+                <textarea class="form-control" id="work_life_balance" name="work_life_balance" rows="3" placeholder="Describe your work-life balance approach" required></textarea>
+            </div>
+
+            <!-- Strengths and Opportunities -->
+            <h3>Strengths and Opportunities / Glow and Grow</h3>
+
+            <div class="mb-4">
+                <label for="strengths" class="form-label">What I believe are my top strengths</label>
+                <textarea class="form-control" id="strengths" name="strengths" rows="3" placeholder="Share what you consider to be your top strengths"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="improvement_areas" class="form-label">Areas where I'm working to improve</label>
+                <textarea class="form-control" id="improvement_areas" name="improvement_areas" rows="3" placeholder="Describe areas you're actively working to develop"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="support_growth" class="form-label">How others can support my growth</label>
+                <textarea class="form-control" id="support_growth" name="support_growth" rows="3" placeholder="Share specific ways others can help you grow"></textarea>
+            </div>
+
+            <!-- Working Style -->
+            <h3>Working Style</h3>
+
+            <div class="mb-4">
+                <label for="work_preference" class="form-label">How I prefer to work (e.g., alone, in teams)</label>
+                <textarea class="form-control" id="work_preference" name="work_preference" rows="3" placeholder="Describe your preferred work environment and collaboration style"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="productivity_peaks" class="form-label">My productivity peaks (e.g., morning person, night owl)</label>
+                <textarea class="form-control" id="productivity_peaks" name="productivity_peaks" rows="3" placeholder="Share when you're most productive and focused"></textarea>
+            </div>
+
+            <div class="ranking-section">
+                <div style="font-weight: normal; margin-bottom: 1rem;">How I typically show up during problem-solving (Rank 1-4, where 1 is most common)</div>
+                <div id="problem-solving-message" class="text-danger small mb-2" style="transition: opacity 0.5s;"></div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Opposing / Challenging</span>
+                        <select class="form-select" name="rank_opposing" data-ranking-group="problem-solving" onchange="ensureUniqueRanking(this, 'problem-solving')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Supporting / Encouraging</span>
+                        <select class="form-select" name="rank_supporting" data-ranking-group="problem-solving" onchange="ensureUniqueRanking(this, 'problem-solving')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Suggesting / Actioning</span>
+                        <select class="form-select" name="rank_suggesting" data-ranking-group="problem-solving" onchange="ensureUniqueRanking(this, 'problem-solving')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Asking / Reflecting</span>
+                        <select class="form-select" name="rank_asking" data-ranking-group="problem-solving" onchange="ensureUniqueRanking(this, 'problem-solving')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-section">
+                <div style="font-weight: normal; margin-bottom: 1rem;">How I typically prioritize while problem-solving (Rank 1-3, where 1 is highest priority)</div>
+                <div id="prioritize-message" class="text-danger small mb-2" style="transition: opacity 0.5s;"></div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Relationships and trust</span>
+                        <select class="form-select" name="rank_relationships" data-ranking-group="prioritize" onchange="ensureUniqueRanking(this, 'prioritize')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Highest)</option>
+                            <option value="2">2</option>
+                            <option value="3">3 (Lowest)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Process excellence</span>
+                        <select class="form-select" name="rank_process" data-ranking-group="prioritize" onchange="ensureUniqueRanking(this, 'prioritize')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Highest)</option>
+                            <option value="2">2</option>
+                            <option value="3">3 (Lowest)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Task completion</span>
+                        <select class="form-select" name="rank_task" data-ranking-group="prioritize" onchange="ensureUniqueRanking(this, 'prioritize')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Highest)</option>
+                            <option value="2">2</option>
+                            <option value="3">3 (Lowest)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="internal_problem_solving" class="form-label">How I internally approach problem-solving</label>
+                <textarea class="form-control" id="internal_problem_solving" name="internal_problem_solving" rows="3" placeholder="Describe your typical process when tackling problems"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="decision_making" class="form-label">My internal decision-making process</label>
+                <textarea class="form-control" id="decision_making" name="decision_making" rows="3" placeholder="Explain how you typically make decisions"></textarea>
+            </div>
+
+            <!-- Stress and Support -->
+            <h3>Stress and Support</h3>
+
+            <div class="mb-4">
+                <label for="stress_signs" class="form-label">Signs that I'm stressed or overwhelmed</label>
+                <textarea class="form-control" id="stress_signs" name="stress_signs" rows="3" placeholder="Describe behaviors or indicators that show you're under stress"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="support_preference" class="form-label">How I prefer to be supported during challenging times</label>
+                <textarea class="form-control" id="support_preference" name="support_preference" rows="3" placeholder="Share specific ways others can support you when you're facing challenges"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="recharge_methods" class="form-label">What helps me recharge and refocus</label>
+                <textarea class="form-control" id="recharge_methods" name="recharge_methods" rows="3" placeholder="Describe activities or approaches that help you recharge"></textarea>
+            </div>
+
+            <h3>Habits, Quirks, and More!</h3>
+
+            <div class="mb-4">
+                <label for="work_habits" class="form-label">Specific work habits or preferences</label>
+                <textarea class="form-control" id="work_habits" name="work_habits" rows="3" placeholder="Share any specific work habits or preferences others should know about"></textarea>
+            </div>
+
+            <div class="ranking-section">
+                <div style="font-weight: normal; margin-bottom: 1rem;">How I historically would rank the below (Rank 1-6, where 1 is most important)</div>
+                <div id="values-message" class="text-danger small mb-2" style="transition: opacity 0.5s;"></div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Protect equity / fairness</span>
+                        <select class="form-select" name="rank_equity" data-ranking-group="values" onchange="ensureUniqueRanking(this, 'values')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Avoid harm</span>
+                        <select class="form-select" name="rank_harm" data-ranking-group="values" onchange="ensureUniqueRanking(this, 'values')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Protect your people / in-group</span>
+                        <select class="form-select" name="rank_people" data-ranking-group="values" onchange="ensureUniqueRanking(this, 'values')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Protect consistency / purity</span>
+                        <select class="form-select" name="rank_consistency" data-ranking-group="values" onchange="ensureUniqueRanking(this, 'values')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Protect order / authority</span>
+                        <select class="form-select" name="rank_order" data-ranking-group="values" onchange="ensureUniqueRanking(this, 'values')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Protect independence / liberty</span>
+                        <select class="form-select" name="rank_independence" data-ranking-group="values" onchange="ensureUniqueRanking(this, 'values')" required>
+                            <option value="">Select ranking...</option>
+                            <option value="1">1 (Most)</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6 (Least)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OCEAN Assessment -->
+            <div class="mb-4">
+                <div style="font-weight: normal; margin-bottom: 1rem;">My OCEAN 5 (Fill "low", "medium", "high")</div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Openness</span>
+                        <select class="form-select" name="ocean_openness" required>
+                            <option value="">Select...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Conscientiousness</span>
+                        <select class="form-select" name="ocean_conscientiousness" required>
+                            <option value="">Select...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Extroversion</span>
+                        <select class="form-select" name="ocean_extroversion" required>
+                            <option value="">Select...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Agreeableness</span>
+                        <select class="form-select" name="ocean_agreeableness" required>
+                            <option value="">Select...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ms-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: #f0f0f0; font-weight: normal;">Neuroticism</span>
+                        <select class="form-select" name="ocean_neuroticism" required>
+                            <option value="">Select...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="misunderstood_aspects" class="form-label">Things that might be misunderstood about me</label>
+                <textarea class="form-control" id="misunderstood_aspects" name="misunderstood_aspects" rows="3" placeholder="Describe things that might be misunderstood about you" required></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="outside_interests" class="form-label">Important parts of my life outside of work</label>
+                <textarea class="form-control" id="outside_interests" name="outside_interests" rows="3" placeholder="Describe important parts of your life outside work" required></textarea>
+            </div>
+
+            <!-- Us Section Header -->
+            <div class="subsection-header">
+                <h2>About Us</h2>
+            </div>
+
+            <!-- Trust and Relationships -->
+            <h3>Trust and Relationships</h3>
+
+            <div class="mb-4">
+                <label for="build_trust" class="form-label">How to build trust with me</label>
+                <textarea class="form-control" id="build_trust" name="build_trust" rows="3" placeholder="Describe actions that help build trust with you"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="break_trust" class="form-label">Actions or behaviors that may break my trust</label>
+                <textarea class="form-control" id="break_trust" name="break_trust" rows="3" placeholder="Explain behaviors that might damage trust with you"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="relationship_value" class="form-label">What I value most in professional relationships</label>
+                <textarea class="form-control" id="relationship_value" name="relationship_value" rows="3" placeholder="Share qualities you most value in work relationships"></textarea>
+            </div>
+
+            <!-- Feedback and Conflict -->
+            <h3>Feedback and Conflict</h3>
+
+            <div class="mb-4">
+                <label for="give_feedback" class="form-label">How I prefer to give feedforward</label>
+                <textarea class="form-control" id="give_feedback" name="give_feedback" rows="3" placeholder="Describe your preferred approach to giving feedback"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="receive_feedback" class="form-label">How I prefer to receive feedforward</label>
+                <textarea class="form-control" id="receive_feedback" name="receive_feedback" rows="3" placeholder="Share how you prefer to receive feedback from others"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="conflict_approach" class="form-label">My approach to conflicts or disagreements</label>
+                <textarea class="form-control" id="conflict_approach" name="conflict_approach" rows="3" placeholder="Explain how you typically handle conflicts or disagreements"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="diffuse_defense" class="form-label">How to help me diffuse if I get defensive</label>
+                <textarea class="form-control" id="diffuse_defense" name="diffuse_defense" rows="3" placeholder="Share what helps you when you're feeling defensive"></textarea>
+            </div>
+
+            <!-- Working and Meeting Preferences -->
+            <h3>Working and Meeting Preferences</h3>
+
+            <div class="mb-4">
+                <label for="collaboration_preference" class="form-label">How I prefer to collaborate (e.g., alone first, live)</label>
+                <textarea class="form-control" id="collaboration_preference" name="collaboration_preference" rows="3" placeholder="Describe your ideal collaboration process"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="convince_me" class="form-label">How to best convince me</label>
+                <textarea class="form-control" id="convince_me" name="convince_me" rows="3" placeholder="Share what approach works best to persuade you"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="ideal_meeting" class="form-label">My ideal meeting structure</label>
+                <textarea class="form-control" id="ideal_meeting" name="ideal_meeting" rows="3" placeholder="Describe your preferred meeting format and structure"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="meeting_prep" class="form-label">How I like to prepare for meetings</label>
+                <textarea class="form-control" id="meeting_prep" name="meeting_prep" rows="3" placeholder="Explain your typical meeting preparation process"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="meeting_expectations" class="form-label">My expectations for meetings and their outcomes</label>
+                <textarea class="form-control" id="meeting_expectations" name="meeting_expectations" rows="3" placeholder="Share what you expect from meetings and outcomes"></textarea>
+            </div>
+
+            <!-- Communication Preferences -->
+            <h3>Communication Preferences</h3>
+
+            <div class="mb-4">
+                <label for="preferred_channels" class="form-label">Preferred communication channels (e.g., email, ping, text, call)</label>
+                <textarea class="form-control" id="preferred_channels" name="preferred_channels" rows="3" placeholder="List your preferred ways to communicate"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="response_time" class="form-label">Response time expectations</label>
+                <textarea class="form-control" id="response_time" name="response_time" rows="3" placeholder="Share your typical response times and expectations"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="best_times" class="form-label">Best times to reach me</label>
+                <textarea class="form-control" id="best_times" name="best_times" rows="3" placeholder="Indicate when you're most accessible"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="currency_language" class="form-label">My "currency" / language / things I understand best</label>
+                <textarea class="form-control" id="currency_language" name="currency_language" rows="3" placeholder="Describe communication styles that resonate with you"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="receive_updates" class="form-label">How I like to receive updates and information</label>
+                <textarea class="form-control" id="receive_updates" name="receive_updates" rows="3" placeholder="Share your preferred way to receive updates"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="give_updates" class="form-label">How I like to give updates and information</label>
+                <textarea class="form-control" id="give_updates" name="give_updates" rows="3" placeholder="Explain how you prefer to provide updates to others"></textarea>
+            </div>
+
+            <!-- Self-Added Section -->
+            <div class="section-header">
+                <h2>Self-Added! (Optional)</h2>
+                <p>This includes things that you think might lead to conflict or that is just generally important to know about you that wasn't captured above</p>
+            </div>
+
+            <div class="mb-4">
+                <label for="self_added" class="form-label">Additional information</label>
+                <textarea class="form-control" id="self_added" name="self_added" rows="5" placeholder="Share any additional information about yourself that others should know (especially if it could cause trouble left not discussed!)"></textarea>
+                <div class="form-text mb-2">This field is optional - only fill it out if you have additional information to share.</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2 mt-5 mb-5">
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript for form validation and functionality -->
+    <script>
+        // Function to ensure unique ranking within a group
+        function ensureUniqueRanking(select, groupName) {
+            const value = select.value;
+            if (!value) return; // Skip if no value selected
+
+            // Get all selects in the same ranking group
+            const selects = document.querySelectorAll(`select[data-ranking-group="${groupName}"]`);
+
+            // Check if any other select has the same value
+            selects.forEach(otherSelect => {
+                if (otherSelect !== select && otherSelect.value === value) {
+                    otherSelect.value = ""; // Clear the duplicate value
+
+                    // Display message at the top of the section
+                    const messageElement = document.getElementById(`${groupName}-message`);
+                    if (messageElement) {
+                        messageElement.textContent = `Note: Changed duplicate ranking (${value})`;
+                        messageElement.style.opacity = 1;
+
+                        // Auto-hide after delay
+                        setTimeout(() => {
+                            messageElement.style.opacity = 0;
+                        }, 3000);
+                    }
+                }
+            });
+        }
+
+        // Additional function to validate all rankings on form submission
+        function validateAllRankings() {
+            // Get all ranking groups
+            const groups = [...new Set([...document.querySelectorAll('select[data-ranking-group]')].map(el => el.getAttribute('data-ranking-group')))];
+
+            let isValid = true;
+
+            // Check each group
+            groups.forEach(group => {
+                const selects = document.querySelectorAll(`select[data-ranking-group="${group}"]`);
+                const values = [...selects].map(s => s.value).filter(v => v !== "");
+
+                // Check for duplicates
+                const hasDuplicates = new Set(values).size !== values.length;
+
+                if (hasDuplicates) {
+                    isValid = false;
+
+                    // Display message
+                    const messageElement = document.getElementById(`${group}-message`);
+                    if (messageElement) {
+                        messageElement.textContent = "Please fix duplicate rankings";
+                        messageElement.style.opacity = 1;
+                    }
+
+                    // Highlight the duplicates
+                    const valueCounts = {};
+                    values.forEach(v => { valueCounts[v] = (valueCounts[v] || 0) + 1; });
+
+                    selects.forEach(s => {
+                        if (s.value && valueCounts[s.value] > 1) {
+                            s.classList.add('is-invalid');
+                        } else {
+                            s.classList.remove('is-invalid');
+                        }
+                    });
+                }
+            });
+
+            return isValid;
+        }
+
+        // Event listener for form submission
+        document.getElementById('teamHackForm').addEventListener('submit', function(event) {
+            if (!validateAllRankings()) {
+                event.preventDefault();
+                alert('Please fix the duplicate rankings before submitting the form.');
+                return;
+            }
+
+            event.preventDefault();
+            // Add form submission logic here
+            alert('Form submitted! (This is a demo - no data is actually sent)');
+        });
+    </script>
+</body>
+</html>
