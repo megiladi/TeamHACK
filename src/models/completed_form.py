@@ -1,9 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
-# Create a base class for declarative models
-Base = declarative_base()
+from src.models.base import Base
 
 
 class CompletedForm(Base):

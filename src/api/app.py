@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import json
 from src.models.user import User
 from src.models.completed_form import CompletedForm
 from src.models.comparison import Comparison
@@ -17,26 +18,31 @@ app = Flask(__name__, template_folder='src/forms')
 def create_user():
     """
     Create a new user.
-
-    Expects JSON payload with:
-    - username: string
-    - email: string
-
-    Returns:
-    - JSON with user ID and success message
-    - HTTP 201 on success, 400 on error
     """
-    data = request.json
-    new_user = User(username=data['username'], email=data['email'])
+    try:
+        data = request.json
+        print(f"Received data: {data}")
 
-    with Session() as session:
-        try:
-            session.add(new_user)
-            session.commit()
-            return jsonify({"message": "User created", "id": new_user.id}), 201
-        except Exception as e:
-            session.rollback()
-            return jsonify({"error": str(e)}), 400
+        # Check if required fields are present
+        if 'username' not in data or 'email' not in data:
+            return jsonify({"error": "Missing required fields: username and email"}), 400
+
+        new_user = User(username=data['username'], email=data['email'])
+
+        with Session() as session:
+            try:
+                session.add(new_user)
+                session.commit()
+                return jsonify({"message": "User created", "id": new_user.id}), 201
+            except Exception as e:
+                session.rollback()
+                error_message = str(e)
+                print(f"Database error: {error_message}")
+                return jsonify({"error": error_message}), 400
+    except Exception as e:
+        error_message = str(e)
+        print(f"General error: {error_message}")
+        return jsonify({"error": error_message}), 400
 
 # GET user
 
@@ -77,26 +83,45 @@ def fill_form():
 
 @app.route('/completed_forms', methods=['POST'])
 def create_completed_form():
-    """
-    Create a new completed form.
+    """Create a new completed form."""
+    try:
+        # Print the raw form data for debugging
+        print(f"Form data received: {request.form}")
 
-    Expects form data with all fields from the questionnaire
+        # Convert form data to a dictionary
+        data = request.form.to_dict()
 
-    Returns:
-    - JSON with form ID and success message
-    - HTTP 201 on success, 400 on error
-    """
-    data = request.form.to_dict()
-    new_form = CompletedForm(user_id=data.get('user_id'), content=data)
-
-    with Session() as session:
+        # Validate and convert user_id to an integer
         try:
-            session.add(new_form)
-            session.commit()
-            return jsonify({"message": "Form submitted successfully", "id": new_form.id}), 201
-        except Exception as e:
-            session.rollback()
-            return jsonify({"error": str(e)}), 400
+            user_id = int(data.get('user_id'))
+        except (ValueError, TypeError):
+            print(f"Invalid user_id: {data.get('user_id')}")
+            return jsonify({"error": "Invalid user_id"}), 400
+
+        # Convert form data to a JSON string for storage
+        content_json = json.dumps(data)
+
+        # Create the new form object with validated user_id and JSON content
+        new_form = CompletedForm(user_id=user_id, content=content_json)
+
+        # Add to database with proper session handling
+        with Session() as session:
+            try:
+                session.add(new_form)
+                session.commit()
+                # Return success response with the new form's ID
+                return jsonify({"message": "Form submitted successfully", "id": new_form.id}), 201
+            except Exception as e:
+                # Handle database errors
+                session.rollback()
+                error_msg = str(e)
+                print(f"Database error: {error_msg}")
+                return jsonify({"error": error_msg}), 400
+    except Exception as e:
+        # Handle general errors
+        error_msg = str(e)
+        print(f"General error: {error_msg}")
+        return jsonify({"error": error_msg}), 400
 
 # GET completed forms
 

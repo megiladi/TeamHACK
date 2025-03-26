@@ -1,9 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
-# Base class for all models
-Base = declarative_base()
+from src.models.base import Base
 
 
 class Comparison(Base):
