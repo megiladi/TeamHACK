@@ -1,3 +1,4 @@
+import logging
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template, redirect
@@ -14,6 +15,22 @@ from src.db.db_setup import init_db
 from src.db.db_setup import Session
 from src.comparisons.comparison_engine import ComparisonEngine
 from src.auth.auth_manager import AuthManager
+
+# Configure logging
+log_dir = 'logs'
+os.makedirs(log_dir, exist_ok=True)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(os.path.join(log_dir, 'teamhack.log')),
+        logging.StreamHandler()  # Also output to console
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# Add a startup message
+logger.info("Starting TeamHACK application")
 
 # Initialize Flask application
 template_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'webpages'))
@@ -442,17 +459,8 @@ def get_latest_form_by_username(username):
 
 @app.route('/completed_forms/user/<string:username>/<int:form_id>', methods=['DELETE'])
 def delete_user_form(username, form_id):
-    """
-    Delete a completed form by username and form ID.
-
-    This ensures the form belongs to the specified user before deletion.
-
-    Path parameters:
-    - username: string - The username of the form owner
-    - form_id: int - The ID of the form to delete
-    """
-    if not username or not form_id:
-        return jsonify({"error": "Both username and form ID are required"}), 400
+    # Add proper error handling and debugging
+    print(f"Attempting to delete form {form_id} for user {username}")
 
     with Session() as session:
         try:
@@ -461,10 +469,16 @@ def delete_user_form(username, form_id):
             if not user:
                 return jsonify({"error": f"User '{username}' not found"}), 404
 
+            # Log the user ID for debugging
+            print(f"Found user with ID: {user.id}")
+
             # Then find the form and verify it belongs to the user
             form = session.query(CompletedForm).get(form_id)
             if not form:
                 return jsonify({"error": f"Form with ID {form_id} not found"}), 404
+
+            # Log form details
+            print(f"Found form with ID: {form_id}, belonging to user ID: {form.user_id}")
 
             # Check if the form belongs to the user
             if form.user_id != user.id:
@@ -473,12 +487,73 @@ def delete_user_form(username, form_id):
             # Delete the form
             session.delete(form)
             session.commit()
+            print(f"Form {form_id} deleted successfully")
+
             return jsonify({"message": f"Form with ID {form_id} deleted successfully for user '{username}'"}), 200
+
         except Exception as e:
             session.rollback()
             error_msg = str(e)
-            print(f"Database error: {error_msg}")
+            print(f"Error deleting form: {error_msg}")
             return jsonify({"error": f"Server error: {error_msg}"}), 500
+
+# delete form API route
+
+@app.route('/api/forms/<int:form_id>', methods=['DELETE'])
+@login_required
+def delete_form_api(form_id):
+    """API route to delete a form belonging to the current user."""
+    logger.debug(f"API request to delete form {form_id} by user {current_user.username}")
+
+    with Session() as session:
+        try:
+            # Find the form
+            form = session.query(CompletedForm).get(form_id)
+            if not form:
+                logger.warning(f"Form with ID {form_id} not found")
+                return jsonify({"error": f"Form with ID {form_id} not found"}), 404
+
+            # Check if the form belongs to the current user
+            if form.user_id != current_user.id:
+                logger.warning(
+                    f"User {current_user.username} attempted to delete form {form_id} belonging to user {form.user_id}")
+                return jsonify({"error": "You don't have permission to delete this form"}), 403
+
+            # Delete the form
+            session.delete(form)
+            session.commit()
+            logger.info(f"Form {form_id} successfully deleted by user {current_user.username}")
+
+            return jsonify({"message": f"Form deleted successfully"}), 200
+
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error deleting form {form_id}: {str(e)}", exc_info=True)
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# Debug form deletion / other
+
+@app.route('/debug/forms', methods=['GET'])
+def debug_forms():
+    with Session() as session:
+        forms = session.query(CompletedForm).all()
+        form_list = []
+        for form in forms:
+            try:
+                user = session.query(User).get(form.user_id)
+                username = user.username if user else "Unknown"
+                form_list.append({
+                    "id": form.id,
+                    "user_id": form.user_id,
+                    "username": username
+                })
+            except Exception as e:
+                form_list.append({
+                    "id": form.id,
+                    "user_id": form.user_id,
+                    "error": str(e)
+                })
+        return jsonify({"forms": form_list})
 
 # --------------------------
 # Comparison routes
@@ -809,6 +884,63 @@ def get_comparison_by_usernames(username1, username2):
         except Exception as e:
             return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+# GET user comparison API
+
+@app.route('/api/user_comparisons', methods=['GET'])
+@login_required
+def get_user_comparisons():
+    """Get comparisons involving the current user."""
+    logger.debug(f"Fetching comparisons for user {current_user.username}")
+
+    with Session() as session:
+        try:
+            # First get all forms by this user
+            user_forms = session.query(CompletedForm).filter_by(user_id=current_user.id).all()
+
+            if not user_forms:
+                logger.info(f"No forms found for user {current_user.username}")
+                return jsonify([]), 200
+
+            # Get form IDs
+            form_ids = [form.id for form in user_forms]
+
+            # Find comparisons involving these forms
+            comparisons = session.query(Comparison).filter(
+                (Comparison.form1_id.in_(form_ids)) |
+                (Comparison.form2_id.in_(form_ids))
+            ).all()
+
+            results = []
+            for comp in comparisons:
+                try:
+                    form1 = session.get(CompletedForm, comp.form1_id)  # Updated method
+                    form2 = session.get(CompletedForm, comp.form2_id)  # Updated method
+
+                    if not form1 or not form2:
+                        continue
+
+                    user1 = session.get(User, form1.user_id)  # Updated method
+                    user2 = session.get(User, form2.user_id)  # Updated method
+
+                    if not user1 or not user2:
+                        continue
+
+                    results.append({
+                        "id": comp.id,
+                        "user1": user1.username,
+                        "user2": user2.username,
+                        "date": comp.id  # Using ID as proxy for date (add a date field later)
+                    })
+                except Exception as e:
+                    logger.error(f"Error processing comparison {comp.id}: {str(e)}")
+
+            logger.info(f"Found {len(results)} comparisons for user {current_user.username}")
+            return jsonify(results), 200
+
+        except Exception as e:
+            logger.error(f"Error fetching user comparisons: {str(e)}", exc_info=True)
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 # --------------------------
 # Webpage routes
 # --------------------------
@@ -899,29 +1031,60 @@ def dashboard():
 def view_comparison_page(comparison_id):
     with Session() as session:
         try:
+            # Add debugging statements
+            print(f"Fetching comparison with ID: {comparison_id}")
+
             comparison = session.query(Comparison).get(comparison_id)
             if not comparison:
                 return jsonify({"error": f"Comparison with ID {comparison_id} not found"}), 404
 
+            print(f"Found comparison between forms: {comparison.form1_id} and {comparison.form2_id}")
+
+            # Check if forms exist
             form1 = session.query(CompletedForm).get(comparison.form1_id)
             form2 = session.query(CompletedForm).get(comparison.form2_id)
 
+            if not form1 or not form2:
+                return jsonify({"error": "One or both forms in this comparison no longer exist"}), 404
+
+            # Check if users exist
             user1 = session.query(User).get(form1.user_id)
             user2 = session.query(User).get(form2.user_id)
 
-            # Parse JSON strings
-            form1_content = json.loads(form1.content)
-            form2_content = json.loads(form2.content)
-            result = json.loads(comparison.result)
+            if not user1 or not user2:
+                return jsonify({"error": "One or both users in this comparison no longer exist"}), 404
 
-            return render_template(
-                'comparison_result.html',
-                result=result,
-                form1=form1_content,
-                form2=form2_content,
-                user1={'username': user1.username},
-                user2={'username': user2.username}
-            )
+            # Parse JSON strings with error handling
+            try:
+                form1_content = json.loads(form1.content)
+                form2_content = json.loads(form2.content)
+                result = json.loads(comparison.result)
+            except json.JSONDecodeError as e:
+                print(f"JSON parsing error: {e}")
+                return jsonify({"error": f"Error parsing comparison data: {str(e)}"}), 500
+
+            # Verify template exists
+            import os
+            template_path = os.path.join(app.template_folder, 'comparison_result.html')
+            if not os.path.exists(template_path):
+                print(f"Template not found: {template_path}")
+                return jsonify({"error": "Comparison template not found"}), 500
+
+            print("Rendering comparison template...")
+
+            # Add more informative error handling for template rendering
+            try:
+                return render_template(
+                    'comparison_result.html',
+                    result=result,
+                    form1=form1_content,
+                    form2=form2_content,
+                    user1={'username': user1.username},
+                    user2={'username': user2.username}
+                )
+            except Exception as e:
+                print(f"Template rendering error: {str(e)}")
+                return jsonify({"error": f"Template rendering error: {str(e)}"}), 500
 
         except Exception as e:
             # Log the error
