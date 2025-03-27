@@ -5,61 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamHACK - Comparison Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .conflict-none {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        .conflict-low {
-            background-color: #fff9c4;
-            color: #f57f17;
-        }
-        .conflict-medium {
-            background-color: #ffecb3;
-            color: #ff6f00;
-        }
-        .conflict-high {
-            background-color: #ffcdd2;
-            color: #c62828;
-        }
-        .section-header {
-            background-color: #e0e0e0;
-            padding: 15px;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        .field-name {
-            font-weight: bold;
-        }
-        .comparison-card {
-            margin-bottom: 15px;
-            border-left: 4px solid #ccc;
-        }
-        .conflict-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 10px;
-        }
-        .conflict-indicator-none {
-            background-color: #4caf50;
-        }
-        .conflict-indicator-low {
-            background-color: #ffeb3b;
-        }
-        .conflict-indicator-medium {
-            background-color: #ff9800;
-        }
-        .conflict-indicator-high {
-            background-color: #f44336;
-        }
-    </style>
 </head>
 <body>
-    <div class="container mt-5 mb-5">
-        <h1 class="mb-4">TeamHACK - Team Comparison Results</h1>
+    <div class="container mt-5">
+        <h1>TeamHACK - Team Comparison Results</h1>
 
         <div class="card mb-4">
             <div class="card-header">
@@ -73,17 +22,7 @@
                     </div>
                     <div class="col-md-6">
                         <h4>Overall Assessment</h4>
-                        <p class="p-2 rounded
-                            {% if result.conflict_summary.overall_assessment.startswith('High') %}
-                                conflict-high
-                            {% elif result.conflict_summary.overall_assessment.startswith('Moderate') %}
-                                conflict-medium
-                            {% elif result.conflict_summary.overall_assessment.startswith('Some') %}
-                                conflict-low
-                            {% else %}
-                                conflict-none
-                            {% endif %}
-                        ">{{ result.conflict_summary.overall_assessment }}</p>
+                        <p>{{ result.conflict_summary.overall_assessment }}</p>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -96,189 +35,9 @@
             </div>
         </div>
 
-        <!-- Key Conflicts Section -->
-        {% if result.conflict_summary.conflict_areas|length > 0 %}
-        <div class="section-header">
-            <h2>Key Conflict Areas</h2>
-        </div>
-        <div class="row">
-            {% for conflict in result.conflict_summary.conflict_areas %}
-            <div class="col-md-6">
-                <div class="card mb-3 {% if conflict.is_high_priority %}border-danger{% endif %}">
-                    <div class="card-header {% if conflict.is_high_priority %}bg-danger text-white{% endif %}">
-                        {% if conflict.is_high_priority %}<span class="badge bg-danger">High Priority</span>{% endif %}
-                        {{ conflict.field|replace('_', ' ')|title }}
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Type:</strong> {{ conflict.type|title }}</p>
-                        {% if conflict.difference %}
-                        <p><strong>Difference:</strong> {{ conflict.difference }}</p>
-                        {% endif %}
-                        {% if conflict.conflict_level %}
-                        <p>
-                            <strong>Level:</strong>
-                            <span class="conflict-indicator conflict-indicator-{{ conflict.conflict_level }}"></span>
-                            {{ conflict.conflict_level|title }}
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Likert Scales Section -->
-        {% if result.likert_scales|length > 0 %}
-        <div class="section-header">
-            <h2>Likert Scale Comparisons</h2>
-        </div>
-        <div class="row">
-            {% for field_name, comparison in result.likert_scales.items() %}
-            <div class="col-md-6">
-                <div class="card comparison-card mb-3 {% if comparison.is_conflict %}border-warning{% endif %}">
-                    <div class="card-header">
-                        {% if comparison.is_conflict %}<span class="badge bg-warning text-dark">Potential Conflict</span>{% endif %}
-                        {{ field_name|replace('_', ' ')|title }}
-                    </div>
-                    <div class="card-body">
-                        <p>{{ user1.username }}: <strong>{{ comparison.value1 }}</strong></p>
-                        <p>{{ user2.username }}: <strong>{{ comparison.value2 }}</strong></p>
-                        <p>Difference: <strong>{{ comparison.difference }}</strong></p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Rankings Section -->
-        {% if result.rankings|length > 0 %}
-        <div class="section-header">
-            <h2>Ranking Comparisons</h2>
-        </div>
-        {% for group_name, group_comparisons in result.rankings.items() %}
-        <h3 class="mt-4">{{ group_name|replace('_', ' ')|title }}</h3>
-        <div class="row">
-            {% for field_name, comparison in group_comparisons.items() %}
-            <div class="col-md-6">
-                <div class="card comparison-card mb-3 {% if comparison.is_conflict %}{% if comparison.is_high_priority_conflict %}border-danger{% else %}border-warning{% endif %}{% endif %}">
-                    <div class="card-header">
-                        {% if comparison.is_high_priority_conflict %}
-                        <span class="badge bg-danger">High Priority Conflict</span>
-                        {% elif comparison.is_conflict %}
-                        <span class="badge bg-warning text-dark">Potential Conflict</span>
-                        {% endif %}
-                        {{ field_name|replace('_', ' ')|title }}
-                    </div>
-                    <div class="card-body">
-                        <p>{{ user1.username }}'s Rank: <strong>{{ comparison.rank1 }}</strong></p>
-                        <p>{{ user2.username }}'s Rank: <strong>{{ comparison.rank2 }}</strong></p>
-                        <p>Difference: <strong>{{ comparison.difference }}</strong></p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endfor %}
-        {% endif %}
-
-        <!-- Traits Section -->
-        {% if result.traits|length > 0 %}
-        <div class="section-header">
-            <h2>Trait Comparisons</h2>
-        </div>
-        <div class="row">
-            {% for field_name, comparison in result.traits.items() %}
-            <div class="col-md-6">
-                <div class="card comparison-card mb-3 {% if comparison.is_conflict %}border-warning{% endif %}">
-                    <div class="card-header">
-                        {% if comparison.is_conflict %}<span class="badge bg-warning text-dark">Potential Conflict</span>{% endif %}
-                        {{ field_name|replace('_', ' ')|title }}
-                    </div>
-                    <div class="card-body">
-                        <p>{{ user1.username }}: <strong>{{ comparison.trait1|title }}</strong></p>
-                        <p>{{ user2.username }}: <strong>{{ comparison.trait2|title }}</strong></p>
-                        <p>Difference: <strong>{{ comparison.difference }}</strong></p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Free Text Section -->
-        {% if result.free_text|length > 0 %}
-        <div class="section-header">
-            <h2>Text Response Comparisons</h2>
-        </div>
-        <div class="row">
-            {% for field_name, comparison in result.free_text.items() %}
-            <div class="col-md-12">
-                <div class="card comparison-card mb-4
-                    {% if comparison.conflict_level == 'high' %}
-                        border-danger
-                    {% elif comparison.conflict_level == 'medium' %}
-                        border-warning
-                    {% elif comparison.conflict_level == 'low' %}
-                        border-info
-                    {% endif %}
-                ">
-                    <div class="card-header">
-                        {% if comparison.conflict_level == 'high' %}
-                        <span class="badge bg-danger">High Conflict</span>
-                        {% elif comparison.conflict_level == 'medium' %}
-                        <span class="badge bg-warning text-dark">Medium Conflict</span>
-                        {% elif comparison.conflict_level == 'low' %}
-                        <span class="badge bg-info text-dark">Low Conflict</span>
-                        {% else %}
-                        <span class="badge bg-success">No Conflict</span>
-                        {% endif %}
-                        {{ field_name|replace('_', ' ')|title }}
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5>{{ user1.username }}</h5>
-                                <p class="border p-2 rounded" style="min-height: 100px;">{{ form1[field_name] }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h5>{{ user2.username }}</h5>
-                                <p class="border p-2 rounded" style="min-height: 100px;">{{ form2[field_name] }}</p>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="mt-3">
-                            <h5>Analysis</h5>
-                            <p><strong>Similarity Score:</strong> {{ comparison.similarity_score }}%</p>
-                            <p><strong>Conflict Level:</strong>
-                                <span class="conflict-indicator conflict-indicator-{{ comparison.conflict_level }}"></span>
-                                {{ comparison.conflict_level|title }}
-                            </p>
-                            <p><strong>Explanation:</strong> {{ comparison.explanation }}</p>
-                            {% if comparison.potential_conflicts|length > 0 %}
-                            <div class="mt-3">
-                                <h6>Potential Conflicts:</h6>
-                                <ul class="list-group">
-                                    {% for conflict in comparison.potential_conflicts %}
-                                    <li class="list-group-item">{{ conflict }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
         <div class="mt-5 mb-5 text-center">
             <a href="/" class="btn btn-primary">Back to Home</a>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

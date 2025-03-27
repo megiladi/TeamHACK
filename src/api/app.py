@@ -10,6 +10,8 @@ from src.comparisons.comparison_engine import ComparisonEngine
 # Initialize Flask application
 template_folder = os.path.join(os.path.dirname(__file__), '..', 'forms')
 app = Flask(__name__, template_folder=template_folder)
+app.jinja_env.auto_reload = True
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Path to form.html
 form_html_path = os.path.join(os.path.dirname(__file__), '..', 'forms', 'form.html')
@@ -620,6 +622,7 @@ def get_comparison_by_usernames(username1, username2):
             return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # GET visualization
+
 @app.route('/comparisons/<int:comparison_id>/view', methods=['GET'])
 def view_comparison_page(comparison_id):
     """
@@ -627,15 +630,15 @@ def view_comparison_page(comparison_id):
 
     Args:
         comparison_id: ID of the comparison to display
-
-    Returns:
-        HTML page with the comparison visualization
     """
     with Session() as session:
         try:
-            comparison = session.query(Comparison).get(comparison_id)
+            # Debug prints
+            print(f"Fetching comparison with ID: {comparison_id}")
 
+            comparison = session.query(Comparison).get(comparison_id)
             if not comparison:
+                print(f"Comparison not found: {comparison_id}")
                 return jsonify({"error": f"Comparison with ID {comparison_id} not found"}), 404
 
             # Get the original forms
@@ -651,20 +654,41 @@ def view_comparison_page(comparison_id):
             form2_content = json.loads(form2.content)
             result = json.loads(comparison.result)
 
-            # Render the template with all data
-            return render_template(
-                'comparison_result.html',
-                comparison=comparison,
-                form1=form1_content,
-                form2=form2_content,
-                user1=user1,
-                user2=user2,
-                result=result
-            )
+            # Debug the data
+            print(f"Users: {user1.username} vs {user2.username}")
+            print(f"Result keys: {list(result.keys())}")
+            print(f"Conflict summary: {result['conflict_summary']}")
+
+            # Prepare template data
+            template_data = {
+                'comparison': {
+                    'id': comparison.id,
+                    'form1_id': comparison.form1_id,
+                    'form2_id': comparison.form2_id
+                },
+                'form1': form1_content,
+                'form2': form2_content,
+                'user1': {
+                    'id': user1.id,
+                    'username': user1.username,
+                    'email': user1.email
+                },
+                'user2': {
+                    'id': user2.id,
+                    'username': user2.username,
+                    'email': user2.email
+                },
+                'result': result
+            }
+
+            # Render the template
+            return render_template('comparison_result.html', **template_data)
 
         except Exception as e:
+            import traceback
             error_msg = str(e)
             print(f"View error: {error_msg}")
+            print(traceback.format_exc())
             return jsonify({"error": f"Server error: {error_msg}"}), 500
 
 # --------------------------
