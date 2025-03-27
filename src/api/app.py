@@ -1,23 +1,33 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
+from flask_login import LoginManager, login_required, current_user
 import json
+
+# Load environment variables
+load_dotenv()
+
 from src.models.user import User
 from src.models.completed_form import CompletedForm
 from src.models.comparison import Comparison
 from src.db.db_setup import Session
 from src.comparisons.comparison_engine import ComparisonEngine
+from src.auth.auth_manager import AuthManager
 
 # Initialize Flask application
 template_folder = os.path.join(os.path.dirname(__file__), '..', 'forms')
 app = Flask(__name__, template_folder=template_folder)
-app.jinja_env.auto_reload = True
-app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
 
 # Path to form.html
 form_html_path = os.path.join(os.path.dirname(__file__), '..', 'forms', 'form.html')
 
 # Initialize the comparison engine with the form path
 comparison_engine = ComparisonEngine(form_html_path)
+
+# Initialize Authentication Manager
+auth_manager = AuthManager(app)
 
 # --------------------------
 # Basic routes
@@ -31,6 +41,89 @@ def index():
     Route for the root URL, redirects to the form.
     """
     return render_template('index.html')
+
+# --------------------------
+# Authentication routes
+# --------------------------
+
+# Register
+
+@app.route('/register', methods=['POST'])
+def register():
+    """
+    User registration route.
+    """
+    try:
+        data = request.json
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+
+        # Validate input
+        if not all([username, email, password]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Attempt to register the user
+        user = auth_manager.register_user(username, email, password)
+
+        if user:
+            return jsonify({
+                "message": "User registered successfully",
+                "user_id": user.id
+            }), 201
+        else:
+            return jsonify({"error": "Username or email already exists"}), 409
+
+    except Exception as e:
+        print(f"Registration error: {str(e)}")
+        return jsonify({"error": "Server error during registration"}), 500
+
+# Login
+
+@app.route('/login', methods=['POST'])
+def login():
+    """
+    User login route.
+    """
+    try:
+        data = request.json
+        username = data.get('username')
+        password = data.get('password')
+
+        # Validate input
+        if not all([username, password]):
+            return jsonify({"error": "Missing username or password"}), 400
+
+        # Attempt to log in the user
+        user = auth_manager.login(username, password)
+
+        if user:
+            return jsonify({
+                "message": "Login successful",
+                "user_id": user.id,
+                "username": user.username
+            }), 200
+        else:
+            return jsonify({"error": "Invalid username or password"}), 401
+
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        return jsonify({"error": "Server error during login"}), 500
+
+# Logout
+
+@app.route('/logout', methods=['POST'])
+@login_required
+def logout():
+    """
+    User logout route.
+    """
+    try:
+        auth_manager.logout()
+        return jsonify({"message": "Logged out successfully"}), 200
+    except Exception as e:
+        print(f"Logout error: {str(e)}")
+        return jsonify({"error": "Server error during logout"}), 500
 
 # --------------------------
 # User routes
