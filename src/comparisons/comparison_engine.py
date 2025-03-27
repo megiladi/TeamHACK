@@ -11,9 +11,14 @@ class ComparisonEngine:
     Uses pattern detection for field types without hardcoded field lists.
     """
 
-    def __init__(self):
-        """Initialize the comparison engine components."""
-        self.form_metadata = FormMetadata()
+    def __init__(self, form_html_path=None):
+        """
+        Initialize the comparison engine components.
+
+        Args:
+            form_html_path: Optional path to HTML form file for metadata extraction
+        """
+        self.form_metadata = FormMetadata(form_html_path)
         self.text_analyzer = TextAnalyzer()
 
     def compare_forms(self, form1_content, form2_content):
