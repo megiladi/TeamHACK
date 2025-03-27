@@ -16,13 +16,13 @@ from src.comparisons.comparison_engine import ComparisonEngine
 from src.auth.auth_manager import AuthManager
 
 # Initialize Flask application
-template_folder = os.path.join(os.path.dirname(__file__), '..', 'forms')
+template_folder = os.path.join(os.path.dirname(__file__), '..', 'webpages')
 app = Flask(__name__, template_folder=template_folder)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
 
 # Path to form.html
-form_html_path = os.path.join(os.path.dirname(__file__), '..', 'forms', 'form.html')
+form_html_path = os.path.join(os.path.dirname(__file__), '..', 'webpages', 'form.html')
 
 # Initialize the comparison engine with the form path
 comparison_engine = ComparisonEngine(form_html_path)
@@ -42,9 +42,9 @@ init_db()
 @app.route('/', methods=['GET'])
 def index():
     """
-    Route for the root URL, redirects to the form.
+    Route for the root URL, redirects to the login page.
     """
-    return render_template('index.html')
+    return redirect('/login')
 
 # --------------------------
 # Authentication routes
@@ -151,7 +151,16 @@ def create_user():
         if '@' not in data['email']:
             return jsonify({"error": "Invalid email format"}), 400
 
-        new_user = User(username=data['username'], email=data['email'])
+        # Create a temporary password (properly hashed)
+        from flask_bcrypt import Bcrypt
+        bcrypt = Bcrypt()
+        temp_password = bcrypt.generate_password_hash("temppassword123").decode('utf-8')
+
+        new_user = User(
+            username=data['username'],
+            email=data['email'],
+            password=temp_password  # Add properly hashed password
+        )
 
         with Session() as session:
             try:
