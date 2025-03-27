@@ -159,15 +159,28 @@
                     <div class="card-body">
                         <div class="tab-content" id="comparisonTabContent">
                             <div class="tab-pane fade show active" id="side-by-side" role="tabpanel">
+                                <div class="alert alert-info mb-4">
+                                    <h4 class="alert-heading">Complete Comparison</h4>
+                                    <p>This view shows all responses from both team members. Areas with potential conflicts are highlighted.</p>
+                                    <p class="mb-0 small">Fields are organized to match the structure of the TeamHACK form.</p>
+                                </div>
                                 <div id="comparison-content"></div>
                             </div>
                             <div class="tab-pane fade" id="conflicts-view" role="tabpanel">
                                 <div id="conflicts-content"></div>
                             </div>
                             <div class="tab-pane fade" id="user1-view" role="tabpanel">
+                                <div class="alert alert-info mb-4">
+                                    <h4 class="alert-heading">{{ user1.username }}'s Form Responses</h4>
+                                    <p>All responses from {{ user1.username }} are shown below, organized by section.</p>
+                                </div>
                                 <div id="user1-responses"></div>
                             </div>
                             <div class="tab-pane fade" id="user2-view" role="tabpanel">
+                                <div class="alert alert-info mb-4">
+                                    <h4 class="alert-heading">{{ user2.username }}'s Form Responses</h4>
+                                    <p>All responses from {{ user2.username }} are shown below, organized by section.</p>
+                                </div>
                                 <div id="user2-responses"></div>
                             </div>
                         </div>
@@ -194,30 +207,116 @@
             // ---------- Adaptive field mappings ----------
             // These mappings help detect the type of field and provide readable names
 
-            // Common form sections detected by field name patterns
-            const sectionPatterns = [
-                { pattern: 'timing|working_hours|relax', section: 'My Best Working Self at a Glance' },
-                { pattern: 'speaking|listening|thinking|orientation|deciding|trusting', section: 'The Culture I Come From' },
-                { pattern: 'goals|strengths|work_preference|professional|motivations', section: 'About Me' },
-                { pattern: 'build_trust|break_trust|relationship|give_feedback|receive_feedback', section: 'About Us' },
-                { pattern: 'self_added', section: 'Self-Added Information' }
+            // Form sections based on the structure in form.html
+            const formSections = [
+                { name: 'My Best Working Self at a Glance',
+                  patterns: ['timing_preference', 'working_hours', 'relax_preference', 'brainstorming_preference',
+                             'feeling_preference', 'chat_scheduling', 'communication_medium', 'updating_style',
+                             'asking_style', 'building_preference', 'praise_preference'] },
+                { name: 'The Culture I Come From',
+                  patterns: ['speaking_preference', 'listening_preference', 'tough_news_preference', 'thinking_preference',
+                           'orientation_preference', 'leading_preference', 'deciding_preference', 'trusting_preference',
+                           'disagreeing_preference', 'scheduling_preference'] },
+                { name: 'About Me - Goals and Motivations',
+                  patterns: ['professional_goals', 'motivations', 'success_definition', 'work_life_balance'] },
+                { name: 'About Me - Strengths and Opportunities',
+                  patterns: ['strengths', 'improvement_areas', 'support_growth'] },
+                { name: 'About Me - Working Style',
+                  patterns: ['work_preference', 'productivity_peaks', 'rank_opposing', 'rank_supporting',
+                             'rank_suggesting', 'rank_asking', 'rank_relationships', 'rank_process', 'rank_task',
+                             'internal_problem_solving', 'decision_making'] },
+                { name: 'About Me - Stress and Support',
+                  patterns: ['stress_signs', 'support_preference', 'recharge_methods'] },
+                { name: 'About Me - Habits, Quirks, and More',
+                  patterns: ['work_habits', 'rank_equity', 'rank_harm', 'rank_people', 'rank_consistency',
+                             'rank_order', 'rank_independence', 'ocean_openness', 'ocean_conscientiousness',
+                             'ocean_extroversion', 'ocean_agreeableness', 'ocean_neuroticism',
+                             'misunderstood_aspects', 'outside_interests'] },
+                { name: 'About Us - Trust and Relationships',
+                  patterns: ['build_trust', 'break_trust', 'relationship_value'] },
+                { name: 'About Us - Feedback and Conflict',
+                  patterns: ['give_feedback', 'receive_feedback', 'conflict_approach', 'diffuse_defense'] },
+                { name: 'About Us - Working and Meeting Preferences',
+                  patterns: ['collaboration_preference', 'convince_me', 'ideal_meeting', 'meeting_prep', 'meeting_expectations'] },
+                { name: 'About Us - Communication Preferences',
+                  patterns: ['preferred_channels', 'response_time', 'best_times', 'currency_language',
+                             'receive_updates', 'give_updates'] },
+                { name: 'Self-Added Information',
+                  patterns: ['self_added'] }
             ];
+
+            // This mapping approach is more structured but still dynamic
+            function getSectionForField(field) {
+                // First try exact match
+                for (const section of formSections) {
+                    if (section.patterns.includes(field)) {
+                        return section.name;
+                    }
+                }
+
+                // Then try pattern matching for robustness
+                for (const section of formSections) {
+                    for (const pattern of section.patterns) {
+                        if (field.includes(pattern) || pattern.includes(field)) {
+                            return section.name;
+                        }
+                    }
+                }
+
+                // Fallback to pattern-based section detection if no exact match
+                const sectionPatterns = [
+                    { pattern: 'timing|working_hours|relax', section: 'My Best Working Self at a Glance' },
+                    { pattern: 'speaking|listening|thinking|orientation|deciding|trusting', section: 'The Culture I Come From' },
+                    { pattern: 'goals|strengths|work_preference|professional|motivations', section: 'About Me' },
+                    { pattern: 'build_trust|break_trust|relationship|give_feedback|receive_feedback', section: 'About Us' },
+                    { pattern: 'self_added', section: 'Self-Added Information' }
+                ];
+
+                for (const { pattern, section } of sectionPatterns) {
+                    if (new RegExp(pattern).test(field)) {
+                        return section;
+                    }
+                }
+
+                return 'Other';
+            }
 
             // Known question mappings from numerical values to human-readable text
             const knownFieldMappings = {
                 // Dictionary of field name regex patterns to their scale values
                 likertScales: {
+                    // My Best Working Self at a Glance - Timing
                     'timing_preference': { '1': 'Early Bird', '2': 'Balanced', '3': 'Night Owl' },
                     'working_hours': { '1': 'Set Working Hours', '2': 'Somewhat Flexible', '3': 'Very Flexible Hours' },
+
+                    // My Best Working Self at a Glance - Relaxing & Brainstorming
                     'relax_preference': { '1': 'Relax with Others', '2': 'Either Way', '3': 'Relax Alone' },
                     'brainstorming_preference': { '1': 'External Processor (Think Together)', '2': 'Balanced', '3': 'Internal Processor (Think Alone)' },
                     'feeling_preference': { '1': 'Process Events with Others', '2': 'Sometimes Process, Sometimes Move On', '3': 'Move On Quickly' },
+
+                    // My Best Working Self at a Glance - Chatting & Communication
                     'chat_scheduling': { '1': 'Prefer Scheduled Chats', '2': 'Either Way', '3': 'Welcome Interruptions' },
                     'communication_medium': { '1': 'Prefer Video/Call', '2': 'Either Medium', '3': 'Prefer Text/Slack' },
                     'updating_style': { '1': 'Tell the Full Story', '2': 'Moderate Detail', '3': 'Cut to the Chase' },
                     'asking_style': { '1': 'Give Full Context', '2': 'Some Context', '3': 'Just State Needs' },
+
+                    // My Best Working Self at a Glance - Building & Praise
                     'building_preference': { '1': 'Ship Fast & Learn', '2': 'Balanced Approach', '3': 'Learn First, Then Ship' },
-                    'praise_preference': { '1': 'Private Praise', '2': 'Either Way', '3': 'Public Praise' }
+                    'praise_preference': { '1': 'Private Praise', '2': 'Either Way', '3': 'Public Praise' },
+
+                    // The Culture I Come From - Communication & Thinking
+                    'speaking_preference': { '1': 'If I don\'t say it, don\'t assume it', '2': 'Balance of explicit and implicit', '3': 'Read the subtext' },
+                    'listening_preference': { '1': 'Take literally', '2': 'Moderate interpretation', '3': 'With grain of salt' },
+                    'tough_news_preference': { '1': 'Be direct', '2': 'Balanced approach', '3': 'Hint gently' },
+                    'thinking_preference': { '1': 'Theory first (Deduction)', '2': 'Balance of theory and examples', '3': 'Example first (Induction)' },
+
+                    // The Culture I Come From - Work & Decision-Making
+                    'orientation_preference': { '1': 'Journey (Experience)', '2': 'Balance of journey and destination', '3': 'Destination (Accomplish)' },
+                    'leading_preference': { '1': 'Servant Leadership (Flat)', '2': 'Balanced leadership', '3': 'Authority Leadership (Top-Down)' },
+                    'deciding_preference': { '1': 'Group', '2': 'Mix of group and leader', '3': 'Leader' },
+                    'trusting_preference': { '1': 'Performance', '2': 'Mix of performance and relationship', '3': 'Relationship' },
+                    'disagreeing_preference': { '1': 'Embrace/Confront', '2': 'Selective confrontation', '3': 'Avoid' },
+                    'scheduling_preference': { '1': 'Plan and Execute', '2': 'Planned flexibility', '3': 'Plan but Be Flexible' }
                 },
 
                 // OCEAN personality traits mappings
@@ -235,11 +334,126 @@
                     '4': '4th priority',
                     '5': '5th priority',
                     '6': '6th priority (lowest)'
+                },
+
+                // Problem solving ranking group (1-4)
+                problemSolvingRankings: {
+                    'rank_opposing': 'Opposing / Challenging',
+                    'rank_supporting': 'Supporting / Encouraging',
+                    'rank_suggesting': 'Suggesting / Actioning',
+                    'rank_asking': 'Asking / Reflecting'
+                },
+
+                // Priority ranking group (1-3)
+                priorityRankings: {
+                    'rank_relationships': 'Relationships and trust',
+                    'rank_process': 'Process excellence',
+                    'rank_task': 'Task completion'
+                },
+
+                // Values ranking group (1-6)
+                valueRankings: {
+                    'rank_equity': 'Protect equity / fairness',
+                    'rank_harm': 'Avoid harm',
+                    'rank_people': 'Protect your people / in-group',
+                    'rank_consistency': 'Protect consistency / purity',
+                    'rank_order': 'Protect order / authority',
+                    'rank_independence': 'Protect independence / liberty'
                 }
             };
 
-            // Helper function to get a more readable field name
+            // Helper function to get a more readable field name that matches the form
             function getReadableFieldName(field) {
+                // Special field name mappings to match form.html labels
+                const fieldLabels = {
+                    // OCEAN traits
+                    'ocean_openness': 'Personality: Openness',
+                    'ocean_conscientiousness': 'Personality: Conscientiousness',
+                    'ocean_extroversion': 'Personality: Extroversion',
+                    'ocean_agreeableness': 'Personality: Agreeableness',
+                    'ocean_neuroticism': 'Personality: Neuroticism',
+
+                    // Ranking fields in problem solving
+                    'rank_opposing': 'Problem-Solving Style: Opposing / Challenging',
+                    'rank_supporting': 'Problem-Solving Style: Supporting / Encouraging',
+                    'rank_suggesting': 'Problem-Solving Style: Suggesting / Actioning',
+                    'rank_asking': 'Problem-Solving Style: Asking / Reflecting',
+
+                    // Ranking fields in prioritization
+                    'rank_relationships': 'Priority: Relationships and trust',
+                    'rank_process': 'Priority: Process excellence',
+                    'rank_task': 'Priority: Task completion',
+
+                    // Ranking fields in values
+                    'rank_equity': 'Value: Protect equity / fairness',
+                    'rank_harm': 'Value: Avoid harm',
+                    'rank_people': 'Value: Protect your people / in-group',
+                    'rank_consistency': 'Value: Protect consistency / purity',
+                    'rank_order': 'Value: Protect order / authority',
+                    'rank_independence': 'Value: Protect independence / liberty',
+
+                    // Common likert fields
+                    'timing_preference': 'Working Hours: Early Bird vs Night Owl',
+                    'working_hours': 'Working Hours: Set vs Flexible',
+                    'relax_preference': 'Relaxing: With Others vs Alone',
+                    'brainstorming_preference': 'Thinking: External vs Internal Processor',
+                    'feeling_preference': 'Processing: With Others vs Moving On',
+                    'chat_scheduling': 'Communication: Scheduled vs Interruptions',
+                    'communication_medium': 'Communication: Video/Call vs Text/Slack',
+                    'updating_style': 'Communication: Full Story vs Cut to Chase',
+                    'asking_style': 'Communication: Full Context vs Direct Needs',
+
+                    // Culture fields
+                    'speaking_preference': 'Communication: Explicit vs Implicit',
+                    'listening_preference': 'Communication: Literal vs Interpretive',
+                    'tough_news_preference': 'Communication: Direct vs Gentle with Tough News',
+                    'thinking_preference': 'Thinking: Theory First vs Example First',
+
+                    // Common text fields
+                    'professional_goals': 'My current professional goals',
+                    'motivations': 'What motivates me in my work',
+                    'success_definition': 'How I define success',
+                    'work_life_balance': 'How work-life balance factors into my approach',
+                    'strengths': 'What I believe are my top strengths',
+                    'improvement_areas': 'Areas where I\'m working to improve',
+                    'support_growth': 'How others can support my growth',
+                    'work_preference': 'How I prefer to work (alone, in teams)',
+                    'productivity_peaks': 'My productivity peaks (morning, night)',
+                    'internal_problem_solving': 'How I internally approach problem-solving',
+                    'decision_making': 'My internal decision-making process',
+                    'stress_signs': 'Signs that I\'m stressed or overwhelmed',
+                    'support_preference': 'How I prefer to be supported during challenging times',
+                    'recharge_methods': 'What helps me recharge and refocus',
+                    'work_habits': 'Specific work habits or preferences',
+                    'misunderstood_aspects': 'Things that might be misunderstood about me',
+                    'outside_interests': 'Important parts of my life outside of work',
+                    'build_trust': 'How to build trust with me',
+                    'break_trust': 'Actions or behaviors that may break my trust',
+                    'relationship_value': 'What I value most in professional relationships',
+                    'give_feedback': 'How I prefer to give feedforward',
+                    'receive_feedback': 'How I prefer to receive feedforward',
+                    'conflict_approach': 'My approach to conflicts or disagreements',
+                    'diffuse_defense': 'How to help me diffuse if I get defensive',
+                    'collaboration_preference': 'How I prefer to collaborate',
+                    'convince_me': 'How to best convince me',
+                    'ideal_meeting': 'My ideal meeting structure',
+                    'meeting_prep': 'How I like to prepare for meetings',
+                    'meeting_expectations': 'My expectations for meetings and their outcomes',
+                    'preferred_channels': 'Preferred communication channels',
+                    'response_time': 'Response time expectations',
+                    'best_times': 'Best times to reach me',
+                    'currency_language': 'My "currency" / language / things I understand best',
+                    'receive_updates': 'How I like to receive updates and information',
+                    'give_updates': 'How I like to give updates and information',
+                    'self_added': 'Additional information (self-added)'
+                };
+
+                // Check if we have a specific label for this field
+                if (fieldLabels[field]) {
+                    return fieldLabels[field];
+                }
+
+                // Generic handling for fields without specific labels
                 // First, handle special patterns
                 if (field.startsWith('ocean_')) {
                     const trait = field.replace('ocean_', '');
@@ -269,10 +483,33 @@
                     return value;
                 }
 
-                // Check for ranking fields
+                // Check for ranking fields with specific context
                 if (field.startsWith('rank_')) {
                     const rankNum = parseInt(value);
                     if (!isNaN(rankNum)) {
+                        // Problem solving rankings
+                        if (Object.keys(knownFieldMappings.problemSolvingRankings).includes(field)) {
+                            const position = rankNum === 1 ? 'Most common' :
+                                           rankNum === 4 ? 'Least common' :
+                                           `${rankNum}nd most common`;
+                            return `${position} (${rankNum}/4)`;
+                        }
+
+                        // Priority rankings
+                        if (Object.keys(knownFieldMappings.priorityRankings).includes(field)) {
+                            return rankNum === 1 ? `Highest priority (${rankNum}/3)` :
+                                   rankNum === 3 ? `Lowest priority (${rankNum}/3)` :
+                                   `Medium priority (${rankNum}/3)`;
+                        }
+
+                        // Values rankings
+                        if (Object.keys(knownFieldMappings.valueRankings).includes(field)) {
+                            return rankNum === 1 ? `Most important (${rankNum}/6)` :
+                                   rankNum === 6 ? `Least important (${rankNum}/6)` :
+                                   `Priority ${rankNum}/6`;
+                        }
+
+                        // Default ranking display
                         return knownFieldMappings.rankings[value] || `${rankNum}th priority`;
                     }
                 }
@@ -288,19 +525,25 @@
                 return value;
             }
 
-            // Helper function to guess which section a field belongs to
+            // Helper function to determine which section a field belongs to
             function guessFieldSection(field) {
-                for (const { pattern, section } of sectionPatterns) {
-                    if (new RegExp(pattern).test(field)) {
-                        return section;
-                    }
-                }
-                return 'Other';
+                return getSectionForField(field);
             }
 
             // Helper function to determine conflict status for a field
-            function getFieldStatus(field) {
+            function getFieldStatus(field, value1, value2) {
+                // Find if this field is in the conflict areas
                 const conflict = result.conflict_summary.conflict_areas.find(area => area.field === field);
+
+                // If values are identical, mark as aligned regardless of engine result
+                // (This handles edge cases where the engine might have different criteria)
+                if (value1 === value2 && value1 && value2) {
+                    return {
+                        status: 'aligned',
+                        label: 'Aligned',
+                        className: 'badge-aligned'
+                    };
+                }
 
                 if (!conflict) {
                     return {
@@ -311,6 +554,15 @@
                 }
 
                 if (conflict.is_high_priority) {
+                    return {
+                        status: 'priority',
+                        label: 'High Priority',
+                        className: 'badge-priority'
+                    };
+                }
+
+                // Text conflicts might have a conflict_level
+                if (conflict.conflict_level === 'high') {
                     return {
                         status: 'priority',
                         label: 'High Priority',
@@ -330,16 +582,56 @@
                 const allFields = new Set([...Object.keys(form1), ...Object.keys(form2)]);
                 const sections = {};
 
-                // Group fields by their guessed sections
+                // Setup section order to match form.html
+                const sectionOrder = formSections.map(section => section.name);
+                sectionOrder.forEach(section => {
+                    sections[section] = [];
+                });
+                sections['Other'] = []; // Fallback section
+
+                // Group fields by their sections
                 allFields.forEach(field => {
                     if (field === 'user_id') return;
 
-                    const section = guessFieldSection(field);
+                    const section = getSectionForField(field);
                     if (!sections[section]) {
                         sections[section] = [];
                     }
                     sections[section].push(field);
                 });
+
+                // Order fields within sections based on formSections patterns when possible
+                for (const [sectionName, fields] of Object.entries(sections)) {
+                    if (fields.length === 0) continue;
+
+                    // Find corresponding section in formSections
+                    const sectionDef = formSections.find(s => s.name === sectionName);
+                    if (sectionDef) {
+                        // Create ordered field list based on patterns
+                        const orderedFields = [];
+
+                        // First add fields that match patterns in order
+                        sectionDef.patterns.forEach(pattern => {
+                            fields.forEach(field => {
+                                if (field === pattern || field.includes(pattern) || pattern.includes(field)) {
+                                    if (!orderedFields.includes(field)) {
+                                        orderedFields.push(field);
+                                    }
+                                }
+                            });
+                        });
+
+                        // Then add any remaining fields
+                        fields.forEach(field => {
+                            if (!orderedFields.includes(field)) {
+                                orderedFields.push(field);
+                            }
+                        });
+
+                        // Replace the section's fields with ordered ones
+                        sections[sectionName] = orderedFields;
+                    }
+                }
 
                 return sections;
             }
@@ -349,7 +641,7 @@
                 const comparisonContent = document.getElementById('comparison-content');
                 const user1Responses = document.getElementById('user1-responses');
                 const user2Responses = document.getElementById('user2-responses');
-                const conflictsContent = document.getElementById('conflicts-content');
+        const conflictsContent = document.getElementById('conflicts-content');
 
                 // Clear existing content
                 comparisonContent.innerHTML = '';
@@ -370,8 +662,14 @@
                 `;
                 conflictsContent.appendChild(conflictsIntro);
 
-                // Create sections for each group
-                for (const [section, fields] of Object.entries(organizedSections)) {
+                // Use section order from formSections
+                const sectionOrder = formSections.map(section => section.name);
+                sectionOrder.push('Other'); // Add fallback section
+
+                // Create sections for each group in the correct order
+                for (const section of sectionOrder) {
+                    const fields = organizedSections[section] || [];
+
                     // Skip empty sections
                     if (fields.length === 0) continue;
 
@@ -403,27 +701,33 @@
                     let addedConflictHeader = false;
 
                     // Add individual fields in this section
-                    fields.sort().forEach(field => {
+                    fields.forEach(field => {
                         // Create the comparison row
                         const row = document.createElement('div');
 
-                        // Get field status
-                        const status = getFieldStatus(field);
+                        // Get field values
+                        const value1 = form1[field] || '';
+                        const value2 = form2[field] || '';
+
+                        // Get readable field values
+                        const readableValue1 = getReadableValue(field, value1);
+                        const readableValue2 = getReadableValue(field, value2);
+
+                        // Get field status with actual values
+                        const status = getFieldStatus(field, value1, value2);
                         const isConflict = status.status !== 'aligned';
+
+                        // Get readable field name
+                        const readableField = getReadableFieldName(field);
 
                         // Set row class based on conflict status
                         row.className = isConflict ? 'comparison-row conflict' : 'comparison-row';
 
-                        // Get readable field name and values
-                        const readableField = getReadableFieldName(field);
-                        const value1 = getReadableValue(field, form1[field] || '');
-                        const value2 = getReadableValue(field, form2[field] || '');
-
                         // Create the row content
                         row.innerHTML = `
                             <div class="comparison-field-name">${readableField}</div>
-                            <div class="comparison-field-value">${value1}</div>
-                            <div class="comparison-field-value">${value2}</div>
+                            <div class="comparison-field-value">${readableValue1}</div>
+                            <div class="comparison-field-value">${readableValue2}</div>
                             <div class="comparison-field-status">
                                 <span class="badge-status ${status.className}">${status.label}</span>
                             </div>
@@ -448,8 +752,8 @@
                             conflictRow.className = 'comparison-row conflict';
                             conflictRow.innerHTML = `
                                 <div class="comparison-field-name">${readableField}</div>
-                                <div class="comparison-field-value">${value1}</div>
-                                <div class="comparison-field-value">${value2}</div>
+                                <div class="comparison-field-value">${readableValue1}</div>
+                                <div class="comparison-field-value">${readableValue2}</div>
                                 <div class="comparison-field-status">
                                     <span class="badge-status ${status.className}">${status.label}</span>
                                 </div>
@@ -462,7 +766,7 @@
                         user1Row.className = isConflict ? 'comparison-row conflict' : 'comparison-row';
                         user1Row.innerHTML = `
                             <div class="comparison-field-name">${readableField}</div>
-                            <div class="comparison-field-value">${value1}</div>
+                            <div class="comparison-field-value">${readableValue1}</div>
                         `;
                         user1Responses.appendChild(user1Row);
 
@@ -470,7 +774,7 @@
                         user2Row.className = isConflict ? 'comparison-row conflict' : 'comparison-row';
                         user2Row.innerHTML = `
                             <div class="comparison-field-name">${readableField}</div>
-                            <div class="comparison-field-value">${value2}</div>
+                            <div class="comparison-field-value">${readableValue2}</div>
                         `;
                         user2Responses.appendChild(user2Row);
                     });
@@ -482,6 +786,25 @@
                     noConflicts.className = 'alert alert-success';
                     noConflicts.innerHTML = '<p>No significant differences found! These team members appear well-aligned in their working preferences.</p>';
                     conflictsContent.appendChild(noConflicts);
+                } else {
+                    // Add summary of conflicts
+                    const conflictSummary = document.createElement('div');
+                    conflictSummary.className = 'alert alert-warning mb-4';
+
+                    let priorityCount = 0;
+                    result.conflict_summary.conflict_areas.forEach(conflict => {
+                        if (conflict.is_high_priority || conflict.conflict_level === 'high') {
+                            priorityCount++;
+                        }
+                    });
+
+                    conflictSummary.innerHTML = `
+                        <h5>Conflict Summary</h5>
+                        <p>Total differences found: ${result.conflict_summary.total_conflicts}</p>
+                        <p>High priority discussion points: ${priorityCount}</p>
+                        <p class="mb-0"><strong>Overall assessment:</strong> ${result.conflict_summary.overall_assessment || 'Some differences found that may benefit from discussion'}</p>
+                    `;
+                    conflictsContent.insertBefore(conflictSummary, conflictsContent.firstChild.nextSibling);
                 }
             }
 
