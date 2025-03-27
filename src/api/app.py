@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
-from flask_login import LoginManager, login_required, current_user
+from flask_login import login_required, current_user
 import json
 
 # Load environment variables
