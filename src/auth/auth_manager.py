@@ -90,12 +90,20 @@ class AuthManager:
                 session.add(new_user)
                 session.commit()
 
-                return new_user, None
+                # Before closing the session, copy needed attributes
+                user_data = {
+                    "id": new_user.id,
+                    "username": new_user.username,
+                    "email": new_user.email
+                }
+
+                # Return the dictionary instead of the SQLAlchemy model object
+                return user_data, None
 
             except Exception as e:
                 session.rollback()
-                print(f"Registration error: {e}")
-                return None, f"Database error: {str(e)}"
+                print(f"Registration error details: {str(e)}")
+                return None, f"Registration error: {str(e)}"
 
     def login(self, username, password):
         """

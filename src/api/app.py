@@ -33,6 +33,9 @@ auth_manager = AuthManager(app)
 
 # Initialize database tables
 init_db()
+print("Initializing database tables...")
+init_db()
+print("Database tables initialized!")
 
 # --------------------------
 # Basic routes
@@ -72,19 +75,22 @@ def register():
             return jsonify({"error": "Missing required fields"}), 400
 
         # Attempt to register the user
-        user, error_msg = auth_manager.register_user(username, email, password)
+        user_data, error_msg = auth_manager.register_user(username, email, password)
 
-        if user:
+        if user_data:
             return jsonify({
                 "message": "User registered successfully",
-                "user_id": user.id
+                "user_id": user_data["id"]
             }), 201
+
         else:
             return jsonify({"error": error_msg}), 409
 
+
     except Exception as e:
-        print(f"Registration error: {str(e)}")
-        return jsonify({"error": "Server error during registration"}), 500
+        print(f"Route exception: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 
 # Login
 
@@ -207,6 +213,22 @@ def get_users():
             print(f"Database error: {error_msg}")
             return jsonify({"error": f"Server error: {error_msg}"}), 500
 
+# GET current user
+
+@app.route('/api/current_user', methods=['GET'])
+@login_required
+def get_current_user():
+    """Get information about the currently logged-in user."""
+    try:
+        return jsonify({
+            "id": current_user.id,
+            "username": current_user.username,
+            "email": current_user.email
+        }), 200
+    except Exception as e:
+        print(f"Error fetching current user: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 # GET user by username
 
 @app.route('/users/username/<string:username>', methods=['GET'])
@@ -319,6 +341,77 @@ def get_completed_forms():
             error_msg = str(e)
             print(f"Database error: {error_msg}")
             return jsonify({"error": f"Server error: {error_msg}"}), 500
+
+# GET user forms
+
+@app.route('/api/user_forms', methods=['GET'])
+@login_required  # This ensures only logged-in users can access forms
+def get_user_forms():
+    """Get all forms for the currently logged-in user."""
+    with Session() as session:
+        try:
+            # Get forms for the current user
+            forms = session.query(CompletedForm).filter_by(user_id=current_user.id).all()
+
+            # Format the response
+            form_list = []
+            for form in forms:
+                form_data = {
+                    "id": form.id,
+                    "user_id": form.user_id,
+                    # Parse the form content if it's stored as JSON
+                    "content": json.loads(form.content) if isinstance(form.content, str) else form.content
+                }
+                form_list.append(form_data)
+
+            return jsonify(form_list), 200
+        except Exception as e:
+            print(f"Error fetching user forms: {str(e)}")
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# GET form to view
+
+@app.route('/view_form/<int:form_id>', methods=['GET'])
+@login_required
+def view_form(form_id):
+    """Route to view a specific form."""
+    with Session() as session:
+        try:
+            # Get the form
+            form = session.query(CompletedForm).get(form_id)
+
+            if not form:
+                return jsonify({"error": f"Form with ID {form_id} not found"}), 404
+
+            # Make sure the current user owns this form
+            if form.user_id != current_user.id:
+                return jsonify({"error": "You don't have permission to view this form"}), 403
+
+            # Get the user who owns the form
+            user = session.query(User).get(form.user_id)
+
+            # Parse form content if it's stored as a JSON string
+            form_content = json.loads(form.content) if isinstance(form.content, str) else form.content
+
+            # Either return JSON data or render a template
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    "id": form.id,
+                    "user": user.username,
+                    "content": form_content
+                }), 200
+            else:
+                # Create a template called view_form.html to render the form data
+                return render_template(
+                    'view_form.html',
+                    form_id=form.id,
+                    username=user.username,
+                    form_content=form_content
+                )
+
+        except Exception as e:
+            print(f"Error viewing form: {str(e)}")
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # GET completed form by username
 
