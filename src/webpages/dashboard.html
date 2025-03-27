@@ -9,8 +9,14 @@
 <body>
     <div class="container mt-4">
         <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h1>Welcome, <span id="username"></span></h1>
+                <!-- (1) Log out functionality -->
+                <form id="logoutForm" method="POST" action="/logout">
+                    <button type="submit" class="btn btn-outline-danger">Log Out</button>
+                </form>
+            </div>
             <div class="col-12">
-                <h1>Welcome, {{ user.username }}</h1>
                 <p class="lead">Manage your TeamHACK forms and comparisons</p>
             </div>
         </div>
@@ -20,24 +26,17 @@
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">My Forms</h5>
-                        <a href="/fill_form?user={{ user.username }}" class="btn btn-primary btn-sm">Create New Form</a>
+                        <!-- (2) Submit a form functionality -->
+                        <a href="/fill_form" id="newFormLink" class="btn btn-primary btn-sm">Create New Form</a>
                     </div>
                     <div class="card-body">
-                        {% if forms %}
-                            <ul class="list-group">
-                                {% for form in forms %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Form #{{ form.id }}
-                                        <div>
-                                            <a href="/view_form/{{ form.id }}" class="btn btn-outline-primary btn-sm">View</a>
-                                            <button class="btn btn-outline-danger btn-sm delete-form" data-id="{{ form.id }}">Delete</button>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-center">You haven't created any forms yet.</p>
-                        {% endif %}
+                        <div id="formsList">
+                            <!-- Forms will be loaded here via JavaScript -->
+                            <p class="text-center" id="noFormsMessage" style="display: none;">You haven't created any forms yet.</p>
+                            <div class="d-grid gap-2" id="createFirstFormBtn" style="display: none;">
+                                <a href="/fill_form" id="firstFormLink" class="btn btn-outline-primary">Create Your First Form</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -45,22 +44,21 @@
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Recent Comparisons</h5>
+                        <h5 class="mb-0">Comparisons</h5>
+                        <!-- (4) Conduct a comparison functionality -->
                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newComparisonModal">New Comparison</button>
                     </div>
                     <div class="card-body">
-                        {% if comparisons %}
-                            <ul class="list-group">
-                                {% for comparison in comparisons %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        {{ comparison.user1 }} vs {{ comparison.user2 }}
-                                        <a href="/comparisons/{{ comparison.id }}/view" class="btn btn-outline-primary btn-sm">View</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-center">No comparisons found.</p>
-                        {% endif %}
+                        <h6>Recent Comparisons</h6>
+                        <div id="comparisonsList">
+                            <!-- Comparisons will be loaded here via JavaScript -->
+                            <p class="text-center" id="noComparisonsMessage" style="display: none;">No comparisons found.</p>
+                            <div class="text-center" id="createFirstComparisonBtn" style="display: none;">
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newComparisonModal">
+                                    Create Your First Comparison
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -81,18 +79,14 @@
                             <label for="user1" class="form-label">First User</label>
                             <select class="form-select" id="user1" required>
                                 <option value="" selected disabled>Select user...</option>
-                                {% for u in all_users %}
-                                    <option value="{{ u.username }}">{{ u.username }}</option>
-                                {% endfor %}
+                                <!-- Users will be loaded via JavaScript -->
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="user2" class="form-label">Second User</label>
                             <select class="form-select" id="user2" required>
                                 <option value="" selected disabled>Select user...</option>
-                                {% for u in all_users %}
-                                    <option value="{{ u.username }}">{{ u.username }}</option>
-                                {% endfor %}
+                                <!-- Users will be loaded via JavaScript -->
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Create Comparison</button>
@@ -104,32 +98,176 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Form deletion
-        document.querySelectorAll('.delete-form').forEach(button => {
-            button.addEventListener('click', async function() {
-                if (confirm('Are you sure you want to delete this form?')) {
-                    const formId = this.getAttribute('data-id');
-                    try {
-                        const response = await fetch(`/completed_forms/user/{{ user.username }}/${formId}`, {
-                            method: 'DELETE'
-                        });
-
-                        if (response.ok) {
-                            alert('Form deleted successfully!');
-                            location.reload();
-                        } else {
-                            const data = await response.json();
-                            alert(`Error: ${data.error}`);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the form.');
-                    }
-                }
-            });
+        // Initial data loading
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadUserData();
+            await loadForms();
+            await loadComparisons();
+            await loadAllUsers();
         });
 
-        // New comparison form
+        // Load current user data
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/current_user');
+                if (response.ok) {
+                    const userData = await response.json();
+                    document.getElementById('username').textContent = userData.username;
+
+                    // Update form links with username
+                    const newFormLink = document.getElementById('newFormLink');
+                    newFormLink.href = `/fill_form?user=${userData.username}`;
+
+                    const firstFormLink = document.getElementById('firstFormLink');
+                    firstFormLink.href = `/fill_form?user=${userData.username}`;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Load user's forms
+        async function loadForms() {
+            try {
+                const response = await fetch('/api/user_forms');
+                if (response.ok) {
+                    const forms = await response.json();
+                    const formsList = document.getElementById('formsList');
+
+                    if (forms.length === 0) {
+                        document.getElementById('noFormsMessage').style.display = 'block';
+                        document.getElementById('createFirstFormBtn').style.display = 'block';
+                    } else {
+                        // Clear and populate forms list
+                        formsList.innerHTML = '<ul class="list-group"></ul>';
+                        const formListEl = formsList.querySelector('ul');
+
+                        forms.forEach(form => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            li.innerHTML = `
+                                Form #${form.id}
+                                <div>
+                                    <a href="/view_form/${form.id}" class="btn btn-outline-primary btn-sm">View</a>
+                                    <button class="btn btn-outline-danger btn-sm delete-form" data-id="${form.id}">Delete</button>
+                                </div>
+                            `;
+                            formListEl.appendChild(li);
+                        });
+
+                        // Add event listeners to delete buttons
+                        setupDeleteButtons();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading forms:', error);
+            }
+        }
+
+        // Set up form deletion
+        function setupDeleteButtons() {
+            document.querySelectorAll('.delete-form').forEach(button => {
+                button.addEventListener('click', async function() {
+                    if (confirm('Are you sure you want to delete this form?')) {
+                        const formId = this.getAttribute('data-id');
+                        try {
+                            const response = await fetch(`/api/forms/${formId}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (response.ok) {
+                                alert('Form deleted successfully!');
+                                loadForms(); // Reload the forms list
+                            } else {
+                                const data = await response.json();
+                                alert(`Error: ${data.error}`);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting the form.');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Load user's comparisons
+        async function loadComparisons() {
+            try {
+                const response = await fetch('/api/user_comparisons');
+                if (response.ok) {
+                    const comparisons = await response.json();
+                    const comparisonsList = document.getElementById('comparisonsList');
+
+                    if (comparisons.length === 0) {
+                        document.getElementById('noComparisonsMessage').style.display = 'block';
+                        document.getElementById('createFirstComparisonBtn').style.display = 'block';
+                    } else {
+                        // Clear and populate comparisons list
+                        comparisonsList.innerHTML = '<ul class="list-group"></ul>';
+                        const compListEl = comparisonsList.querySelector('ul');
+
+                        comparisons.forEach(comp => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            li.innerHTML = `
+                                ${comp.user1} vs ${comp.user2}
+                                <a href="/comparisons/${comp.id}/view" class="btn btn-outline-primary btn-sm">View</a>
+                            `;
+                            compListEl.appendChild(li);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading comparisons:', error);
+            }
+        }
+
+        // Load all users for comparison selection
+        async function loadAllUsers() {
+            try {
+                const response = await fetch('/users');
+                if (response.ok) {
+                    const users = await response.json();
+                    const user1Select = document.getElementById('user1');
+                    const user2Select = document.getElementById('user2');
+
+                    // Clear default options
+                    user1Select.innerHTML = '<option value="" selected disabled>Select user...</option>';
+                    user2Select.innerHTML = '<option value="" selected disabled>Select user...</option>';
+
+                    // Get current user info to mark "You" in the dropdown
+                    const currentUserResponse = await fetch('/api/current_user');
+                    let currentUsername = '';
+                    if (currentUserResponse.ok) {
+                        const userData = await currentUserResponse.json();
+                        currentUsername = userData.username;
+                    }
+
+                    // Add users to dropdowns
+                    users.forEach(user => {
+                        const isCurrentUser = user.username === currentUsername;
+
+                        // Add to first dropdown
+                        const option1 = document.createElement('option');
+                        option1.value = user.username;
+                        option1.textContent = user.username + (isCurrentUser ? ' (You)' : '');
+                        if (isCurrentUser) option1.selected = true;
+                        user1Select.appendChild(option1);
+
+                        // Add to second dropdown
+                        const option2 = document.createElement('option');
+                        option2.value = user.username;
+                        option2.textContent = user.username + (isCurrentUser ? ' (You)' : '');
+                        user2Select.appendChild(option2);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // New comparison form submission
         document.getElementById('compareForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -160,6 +298,30 @@
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred while creating the comparison.');
+            }
+        });
+
+        // Logout form submit with fetch API
+        document.getElementById('logoutForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    const data = await response.json();
+                    alert(`Error logging out: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during logout.');
             }
         });
     </script>

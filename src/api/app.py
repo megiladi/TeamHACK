@@ -16,10 +16,11 @@ from src.comparisons.comparison_engine import ComparisonEngine
 from src.auth.auth_manager import AuthManager
 
 # Initialize Flask application
-template_folder = os.path.join(os.path.dirname(__file__), '..', 'webpages')
+template_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'webpages'))
 app = Flask(__name__, template_folder=template_folder)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
+app.jinja_env.autoescape = True
 
 # Path to form.html
 form_html_path = os.path.join(os.path.dirname(__file__), '..', 'webpages', 'form.html')
@@ -42,9 +43,14 @@ init_db()
 @app.route('/', methods=['GET'])
 def index():
     """
-    Route for the root URL, redirects to the login page.
+    Route for the root URL, redirects appropriately based on authentication.
     """
-    return redirect('/login')
+    if current_user.is_authenticated:
+        # Redirect authenticated users to dashboard instead
+        return redirect('/dashboard')
+    else:
+        # Only redirect non-authenticated users to login
+        return redirect('/login')
 
 # --------------------------
 # Authentication routes
