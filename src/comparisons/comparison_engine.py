@@ -4,7 +4,7 @@ from .ranking_analyzer import compare_rankings
 from .low_medium_high_analyzer import compare_low_medium_high_traits
 from .text_analyzer import TextAnalyzer
 from src.forms.form_metadata import FormMetadata
-
+from src.forms.form_metadata import FormMetadata, FIELD_TYPE_LIKERT, FIELD_TYPE_RANKING, FIELD_TYPE_TRAIT, FIELD_TYPE_TEXT, FIELD_TYPE_OTHER
 
 class ComparisonEngine:
     """
