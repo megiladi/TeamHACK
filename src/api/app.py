@@ -5,10 +5,17 @@ from src.models.user import User
 from src.models.completed_form import CompletedForm
 from src.models.comparison import Comparison
 from src.db.db_setup import Session
+from src.comparison.comparison_engine import ComparisonEngine
 
 # Initialize Flask application
 template_folder = os.path.join(os.path.dirname(__file__), '..', 'forms')
 app = Flask(__name__, template_folder=template_folder)
+
+# Path to form.html
+form_html_path = os.path.join(os.path.dirname(__file__), '..', 'forms', 'form.html')
+
+# Initialize the comparison engine with the form path
+comparison_engine = ComparisonEngine(form_html_path)
 
 # --------------------------
 # Basic routes
@@ -291,6 +298,132 @@ def create_comparison():
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+
+# POST comparison of two forms
+
+@app.route('/compare_forms', methods=['POST'])
+def compare_user_forms():
+    """
+    Compare two completed forms and identify potential conflicts.
+
+    Request body:
+    {
+        "form1_id": <int>,
+        "form2_id": <int>
+    }
+
+    Returns:
+        JSON response with comparison results
+    """
+    try:
+        data = request.json
+
+        # Validate request
+        if not data or 'form1_id' not in data or 'form2_id' not in data:
+            return jsonify({"error": "Missing form IDs"}), 400
+
+        form1_id = int(data['form1_id'])
+        form2_id = int(data['form2_id'])
+
+        # Retrieve forms from database
+        with Session() as session:
+            form1 = session.query(CompletedForm).get(form1_id)
+            form2 = session.query(CompletedForm).get(form2_id)
+
+            if not form1 or not form2:
+                return jsonify({"error": "One or both forms not found"}), 404
+
+            # Run comparison using the engine
+            comparison_result = comparison_engine.compare_forms(form1.content, form2.content)
+
+            # Create a new comparison record
+            result_json = json.dumps(comparison_result)
+            new_comparison = Comparison(
+                form1_id=form1_id,
+                form2_id=form2_id,
+                result=result_json
+            )
+
+            session.add(new_comparison)
+            session.commit()
+
+            return jsonify({
+                "message": "Comparison created successfully",
+                "id": new_comparison.id,
+                "result": comparison_result
+            }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# POST comparison using usernames
+
+@app.route('/compare_forms', methods=['POST'])
+def compare_user_forms():
+    """
+    Compare two completed forms identified by usernames and identify potential conflicts.
+
+    Request body:
+    {
+        "username1": <string>,
+        "username2": <string>
+    }
+
+    Returns:
+        JSON response with comparison results
+    """
+    try:
+        data = request.json
+
+        # Validate request
+        if not data or 'username1' not in data or 'username2' not in data:
+            return jsonify({"error": "Missing usernames"}), 400
+
+        username1 = data['username1']
+        username2 = data['username2']
+
+        # Retrieve users and their most recent forms
+        with Session() as session:
+            user1 = session.query(User).filter_by(username=username1).first()
+            user2 = session.query(User).filter_by(username=username2).first()
+
+            if not user1 or not user2:
+                return jsonify({"error": "One or both users not found"}), 404
+
+            # Get most recent form for each user
+            form1 = session.query(CompletedForm).filter_by(user_id=user1.id).order_by(CompletedForm.id.desc()).first()
+            form2 = session.query(CompletedForm).filter_by(user_id=user2.id).order_by(CompletedForm.id.desc()).first()
+
+            if not form1 or not form2:
+                return jsonify({"error": "One or both users have no completed forms"}), 404
+
+            # Run comparison using the engine
+            comparison_result = comparison_engine.compare_forms(form1.content, form2.content)
+
+            # Create a new comparison record
+            result_json = json.dumps(comparison_result)
+            new_comparison = Comparison(
+                form1_id=form1.id,
+                form2_id=form2.id,
+                result=result_json
+            )
+
+            session.add(new_comparison)
+            session.commit()
+
+            return jsonify({
+                "message": "Comparison created successfully",
+                "id": new_comparison.id,
+                "usernames": {
+                    "username1": username1,
+                    "username2": username2
+                },
+                "result": comparison_result
+            }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # GET comparison
 
 @app.route('/comparisons', methods=['GET'])
@@ -312,6 +445,116 @@ def get_comparisons():
             error_msg = str(e)
             print(f"Database error: {error_msg}")
             return jsonify({"error": f"Server error: {error_msg}"}), 500
+
+# GET comparison of two forms
+
+@app.route('/comparisons/<int:comparison_id>', methods=['GET'])
+def view_comparison(comparison_id):
+    """
+    Retrieve and display a saved comparison.
+
+    Args:
+        comparison_id: ID of the comparison to retrieve
+
+    Returns:
+        HTML page or JSON with comparison results
+    """
+    with Session() as session:
+        try:
+            comparison = session.query(Comparison).get(comparison_id)
+
+            if not comparison:
+                return jsonify({"error": f"Comparison with ID {comparison_id} not found"}), 404
+
+            # Check if client wants JSON
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({
+                    "id": comparison.id,
+                    "form1_id": comparison.form1_id,
+                    "form2_id": comparison.form2_id,
+                    "result": json.loads(comparison.result)
+                }), 200
+
+            # Get the original forms
+            form1 = session.query(CompletedForm).get(comparison.form1_id)
+            form2 = session.query(CompletedForm).get(comparison.form2_id)
+
+            # Get user information
+            user1 = session.query(User).get(form1.user_id)
+            user2 = session.query(User).get(form2.user_id)
+
+            # Process the comparison result
+            result = json.loads(comparison.result)
+
+            # Return JSON for now (you can create a template later)
+            return jsonify({
+                "id": comparison.id,
+                "users": {
+                    "user1": {"id": user1.id, "username": user1.username},
+                    "user2": {"id": user2.id, "username": user2.username}
+                },
+                "result": result
+            }), 200
+
+        except Exception as e:
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# GET comparison by usernames
+
+@app.route('/comparisons/<string:username1>/<string:username2>', methods=['GET'])
+def view_comparison_by_usernames(username1, username2):
+    """
+    Retrieve the most recent comparison between two users.
+
+    Args:
+        username1: First user's username
+        username2: Second user's username
+
+    Returns:
+        JSON with comparison results
+    """
+    with Session() as session:
+        try:
+            # Find users by username
+            user1 = session.query(User).filter_by(username=username1).first()
+            user2 = session.query(User).filter_by(username=username2).first()
+
+            if not user1 or not user2:
+                return jsonify({"error": "One or both users not found"}), 404
+
+            # Find the most recent forms for each user
+            form1 = session.query(CompletedForm).filter_by(user_id=user1.id).order_by(CompletedForm.id.desc()).first()
+            form2 = session.query(CompletedForm).filter_by(user_id=user2.id).order_by(CompletedForm.id.desc()).first()
+
+            if not form1 or not form2:
+                return jsonify({"error": "One or both users have no completed forms"}), 404
+
+            # Find the most recent comparison between these forms
+            comparison = session.query(Comparison) \
+                .filter(
+                ((Comparison.form1_id == form1.id) & (Comparison.form2_id == form2.id)) |
+                ((Comparison.form1_id == form2.id) & (Comparison.form2_id == form1.id))
+            ) \
+                .order_by(Comparison.id.desc()) \
+                .first()
+
+            if not comparison:
+                return jsonify({"error": "No comparison found between these users"}), 404
+
+            # Process the comparison result
+            result = json.loads(comparison.result)
+
+            return jsonify({
+                "id": comparison.id,
+                "users": {
+                    "user1": {"id": user1.id, "username": user1.username},
+                    "user2": {"id": user2.id, "username": user2.username}
+                },
+                "result": result
+            }), 200
+
+        except Exception as e:
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # --------------------------
 # Main
