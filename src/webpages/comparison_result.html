@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamHACK - Detailed Comparison</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .main-section-header {
+            background-color: #e0e0e0;
+            padding: 15px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .subsection-header {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .subheading {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+        .comparison-row {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .comparison-row.conflict {
+            background-color: rgba(255, 0, 0, 0.08);
+        }
+
+        .comparison-field-name {
+            width: 25%;
+            padding: 5px;
+            font-weight: 500;
+        }
+
+        .comparison-field-value {
+            width: 30%;
+            padding: 5px;
+        }
+
+        .comparison-field-status {
+            width: 15%;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .badge-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-aligned {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            border: 1px solid #198754;
+        }
+
+        .badge-discuss {
+            background-color: rgba(253, 126, 20, 0.1);
+            color: #fd7e14;
+            border: 1px solid #fd7e14;
+        }
+
+        .badge-priority {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        @media print {
+            .navbar, .nav-tabs, .btn {
+                display: none !important;
+            }
+
+            .tab-pane {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4 mb-5">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand">TeamHACK</span>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-center">Team Member Comparison</h1>
+                <h4 class="text-center text-muted mb-4">Working Norms Discussion Guide</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="comparisonTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="side-by-side-tab" data-bs-toggle="tab"
+                                    data-bs-target="#side-by-side" type="button" role="tab" aria-selected="true">
+                                    Side by Side View
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="conflicts-tab" data-bs-toggle="tab"
+                                    data-bs-target="#conflicts-view" type="button" role="tab" aria-selected="false">
+                                    Discussion Points Only
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="user1-tab" data-bs-toggle="tab"
+                                    data-bs-target="#user1-view" type="button" role="tab" aria-selected="false">
+                                    {{ user1.username }}'s Responses
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="user2-tab" data-bs-toggle="tab"
+                                    data-bs-target="#user2-view" type="button" role="tab" aria-selected="false">
+                                    {{ user2.username }}'s Responses
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="comparisonTabContent">
+                            <div class="tab-pane fade show active" id="side-by-side" role="tabpanel">
+                                <div id="comparison-content"></div>
+                            </div>
+                            <div class="tab-pane fade" id="conflicts-view" role="tabpanel">
+                                <div id="conflicts-content"></div>
+                            </div>
+                            <div class="tab-pane fade" id="user1-view" role="tabpanel">
+                                <div id="user1-responses"></div>
+                            </div>
+                            <div class="tab-pane fade" id="user2-view" role="tabpanel">
+                                <div id="user2-responses"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-5 text-center">
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+            <button id="print-comparison" class="btn btn-secondary ms-2">Print Comparison</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const result = {{ result | tojson }};
+            const form1 = {{ form1 | tojson }};
+            const form2 = {{ form2 | tojson }};
+            const user1 = {{ user1 | tojson }};
+            const user2 = {{ user2 | tojson }};
+
+            // ---------- Adaptive field mappings ----------
+            // These mappings help detect the type of field and provide readable names
+
+            // Common form sections detected by field name patterns
+            const sectionPatterns = [
+                { pattern: 'timing|working_hours|relax', section: 'My Best Working Self at a Glance' },
+                { pattern: 'speaking|listening|thinking|orientation|deciding|trusting', section: 'The Culture I Come From' },
+                { pattern: 'goals|strengths|work_preference|professional|motivations', section: 'About Me' },
+                { pattern: 'build_trust|break_trust|relationship|give_feedback|receive_feedback', section: 'About Us' },
+                { pattern: 'self_added', section: 'Self-Added Information' }
+            ];
+
+            // Known question mappings from numerical values to human-readable text
+            const knownFieldMappings = {
+                // Dictionary of field name regex patterns to their scale values
+                likertScales: {
+                    'timing_preference': { '1': 'Early Bird', '2': 'Balanced', '3': 'Night Owl' },
+                    'working_hours': { '1': 'Set Working Hours', '2': 'Somewhat Flexible', '3': 'Very Flexible Hours' },
+                    'relax_preference': { '1': 'Relax with Others', '2': 'Either Way', '3': 'Relax Alone' },
+                    'brainstorming_preference': { '1': 'External Processor (Think Together)', '2': 'Balanced', '3': 'Internal Processor (Think Alone)' },
+                    'feeling_preference': { '1': 'Process Events with Others', '2': 'Sometimes Process, Sometimes Move On', '3': 'Move On Quickly' },
+                    'chat_scheduling': { '1': 'Prefer Scheduled Chats', '2': 'Either Way', '3': 'Welcome Interruptions' },
+                    'communication_medium': { '1': 'Prefer Video/Call', '2': 'Either Medium', '3': 'Prefer Text/Slack' },
+                    'updating_style': { '1': 'Tell the Full Story', '2': 'Moderate Detail', '3': 'Cut to the Chase' },
+                    'asking_style': { '1': 'Give Full Context', '2': 'Some Context', '3': 'Just State Needs' },
+                    'building_preference': { '1': 'Ship Fast & Learn', '2': 'Balanced Approach', '3': 'Learn First, Then Ship' },
+                    'praise_preference': { '1': 'Private Praise', '2': 'Either Way', '3': 'Public Praise' }
+                },
+
+                // OCEAN personality traits mappings
+                oceanTraits: {
+                    'low': 'Low',
+                    'medium': 'Medium',
+                    'high': 'High'
+                },
+
+                // Typical ranking mappings
+                rankings: {
+                    '1': '1st priority (highest)',
+                    '2': '2nd priority',
+                    '3': '3rd priority',
+                    '4': '4th priority',
+                    '5': '5th priority',
+                    '6': '6th priority (lowest)'
+                }
+            };
+
+            // Helper function to get a more readable field name
+            function getReadableFieldName(field) {
+                // First, handle special patterns
+                if (field.startsWith('ocean_')) {
+                    const trait = field.replace('ocean_', '');
+                    return 'Personality: ' + trait.charAt(0).toUpperCase() + trait.slice(1);
+                }
+
+                if (field.startsWith('rank_')) {
+                    return 'Ranking: ' + field.substring(5).replace(/_/g, ' ');
+                }
+
+                // Standard formatting for other fields
+                return field.replace(/_/g, ' ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            }
+
+            // Helper function to get a human-readable value based on field type
+            function getReadableValue(field, value) {
+                if (!value) return '';
+
+                // Check for OCEAN trait fields
+                if (field.startsWith('ocean_')) {
+                    if (knownFieldMappings.oceanTraits[value.toLowerCase()]) {
+                        return knownFieldMappings.oceanTraits[value.toLowerCase()];
+                    }
+                    return value;
+                }
+
+                // Check for ranking fields
+                if (field.startsWith('rank_')) {
+                    const rankNum = parseInt(value);
+                    if (!isNaN(rankNum)) {
+                        return knownFieldMappings.rankings[value] || `${rankNum}th priority`;
+                    }
+                }
+
+                // Check for Likert scale fields
+                for (const [fieldPattern, valueMap] of Object.entries(knownFieldMappings.likertScales)) {
+                    if (field === fieldPattern && valueMap[value]) {
+                        return valueMap[value];
+                    }
+                }
+
+                // If no mapping exists, return the original value
+                return value;
+            }
+
+            // Helper function to guess which section a field belongs to
+            function guessFieldSection(field) {
+                for (const { pattern, section } of sectionPatterns) {
+                    if (new RegExp(pattern).test(field)) {
+                        return section;
+                    }
+                }
+                return 'Other';
+            }
+
+            // Helper function to determine conflict status for a field
+            function getFieldStatus(field) {
+                const conflict = result.conflict_summary.conflict_areas.find(area => area.field === field);
+
+                if (!conflict) {
+                    return {
+                        status: 'aligned',
+                        label: 'Aligned',
+                        className: 'badge-aligned'
+                    };
+                }
+
+                if (conflict.is_high_priority) {
+                    return {
+                        status: 'priority',
+                        label: 'High Priority',
+                        className: 'badge-priority'
+                    };
+                }
+
+                return {
+                    status: 'discuss',
+                    label: 'Discuss',
+                    className: 'badge-discuss'
+                };
+            }
+
+            // Function to dynamically organize fields into sections
+            function organizeFields() {
+                const allFields = new Set([...Object.keys(form1), ...Object.keys(form2)]);
+                const sections = {};
+
+                // Group fields by their guessed sections
+                allFields.forEach(field => {
+                    if (field === 'user_id') return;
+
+                    const section = guessFieldSection(field);
+                    if (!sections[section]) {
+                        sections[section] = [];
+                    }
+                    sections[section].push(field);
+                });
+
+                return sections;
+            }
+
+            // Render side-by-side comparison
+            function renderSideBySide() {
+                const comparisonContent = document.getElementById('comparison-content');
+                const user1Responses = document.getElementById('user1-responses');
+                const user2Responses = document.getElementById('user2-responses');
+                const conflictsContent = document.getElementById('conflicts-content');
+
+                // Clear existing content
+                comparisonContent.innerHTML = '';
+                user1Responses.innerHTML = '';
+                user2Responses.innerHTML = '';
+                conflictsContent.innerHTML = '';
+
+                // Organize fields by section
+                const organizedSections = organizeFields();
+
+                // Create conflicts intro
+                const conflictsIntro = document.createElement('div');
+                conflictsIntro.className = 'alert alert-info';
+                conflictsIntro.innerHTML = `
+                    <h4 class="alert-heading">Discussion Points</h4>
+                    <p>Below are the areas where ${user1.username} and ${user2.username} have different preferences or perspectives
+                    that may benefit from discussion. Focus on these topics during your working norms conversation.</p>
+                `;
+                conflictsContent.appendChild(conflictsIntro);
+
+                // Create sections for each group
+                for (const [section, fields] of Object.entries(organizedSections)) {
+                    // Skip empty sections
+                    if (fields.length === 0) continue;
+
+                    // Create main section header
+                    const sectionHeader = document.createElement('div');
+                    sectionHeader.className = 'main-section-header';
+                    sectionHeader.textContent = section;
+                    comparisonContent.appendChild(sectionHeader);
+
+                    // Create section header for individual user views
+                    const user1SectionHeader = sectionHeader.cloneNode(true);
+                    user1Responses.appendChild(user1SectionHeader);
+
+                    const user2SectionHeader = sectionHeader.cloneNode(true);
+                    user2Responses.appendChild(user2SectionHeader);
+
+                    // Add table header for side-by-side view
+                    const headerRow = document.createElement('div');
+                    headerRow.className = 'comparison-row bg-light';
+                    headerRow.innerHTML = `
+                        <div class="comparison-field-name">Field</div>
+                        <div class="comparison-field-value">${user1.username}</div>
+                        <div class="comparison-field-value">${user2.username}</div>
+                        <div class="comparison-field-status">Status</div>
+                    `;
+                    comparisonContent.appendChild(headerRow);
+
+                    // Create conflict section header if needed
+                    let addedConflictHeader = false;
+
+                    // Add individual fields in this section
+                    fields.sort().forEach(field => {
+                        // Create the comparison row
+                        const row = document.createElement('div');
+
+                        // Get field status
+                        const status = getFieldStatus(field);
+                        const isConflict = status.status !== 'aligned';
+
+                        // Set row class based on conflict status
+                        row.className = isConflict ? 'comparison-row conflict' : 'comparison-row';
+
+                        // Get readable field name and values
+                        const readableField = getReadableFieldName(field);
+                        const value1 = getReadableValue(field, form1[field] || '');
+                        const value2 = getReadableValue(field, form2[field] || '');
+
+                        // Create the row content
+                        row.innerHTML = `
+                            <div class="comparison-field-name">${readableField}</div>
+                            <div class="comparison-field-value">${value1}</div>
+                            <div class="comparison-field-value">${value2}</div>
+                            <div class="comparison-field-status">
+                                <span class="badge-status ${status.className}">${status.label}</span>
+                            </div>
+                        `;
+
+                        // Add to side-by-side view
+                        comparisonContent.appendChild(row);
+
+                        // Add to conflicts view if it's a conflict
+                        if (isConflict) {
+                            // Add conflict section header if not added yet
+                            if (!addedConflictHeader) {
+                                const conflictSectionHeader = document.createElement('div');
+                                conflictSectionHeader.className = 'main-section-header';
+                                conflictSectionHeader.textContent = section;
+                                conflictsContent.appendChild(conflictSectionHeader);
+                                addedConflictHeader = true;
+                            }
+
+                            // Create conflict row
+                            const conflictRow = document.createElement('div');
+                            conflictRow.className = 'comparison-row conflict';
+                            conflictRow.innerHTML = `
+                                <div class="comparison-field-name">${readableField}</div>
+                                <div class="comparison-field-value">${value1}</div>
+                                <div class="comparison-field-value">${value2}</div>
+                                <div class="comparison-field-status">
+                                    <span class="badge-status ${status.className}">${status.label}</span>
+                                </div>
+                            `;
+                            conflictsContent.appendChild(conflictRow);
+                        }
+
+                        // Add to individual user views
+                        const user1Row = document.createElement('div');
+                        user1Row.className = isConflict ? 'comparison-row conflict' : 'comparison-row';
+                        user1Row.innerHTML = `
+                            <div class="comparison-field-name">${readableField}</div>
+                            <div class="comparison-field-value">${value1}</div>
+                        `;
+                        user1Responses.appendChild(user1Row);
+
+                        const user2Row = document.createElement('div');
+                        user2Row.className = isConflict ? 'comparison-row conflict' : 'comparison-row';
+                        user2Row.innerHTML = `
+                            <div class="comparison-field-name">${readableField}</div>
+                            <div class="comparison-field-value">${value2}</div>
+                        `;
+                        user2Responses.appendChild(user2Row);
+                    });
+                }
+
+                // Add no conflicts message if needed
+                if (!result.conflict_summary.total_conflicts) {
+                    const noConflicts = document.createElement('div');
+                    noConflicts.className = 'alert alert-success';
+                    noConflicts.innerHTML = '<p>No significant differences found! These team members appear well-aligned in their working preferences.</p>';
+                    conflictsContent.appendChild(noConflicts);
+                }
+            }
+
+            // Print functionality
+            document.getElementById('print-comparison').addEventListener('click', function() {
+                window.print();
+            });
+
+            // Render the comparison
+            renderSideBySide();
+        });
+    </script>
+</body>
+</html>
