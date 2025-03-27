@@ -37,8 +37,15 @@ class AuthManager:
             Returns:
                 User or None: User object if found, else None
             """
-            with Session() as session:
-                return session.query(User).get(int(user_id))
+            try:
+                print(f"Loading user_id: {user_id}")
+                with Session() as session:
+                    user = session.query(User).get(int(user_id))
+                    print(f"User loader found: {user}")
+                    return user
+            except Exception as e:
+                print(f"Error in user_loader: {str(e)}")
+                return None
 
     def register_user(self, username, email, password):
         """

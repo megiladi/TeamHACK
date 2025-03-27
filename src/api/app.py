@@ -2,7 +2,7 @@ import logging
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template, redirect
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user
 import json
 
 # Load environment variables
@@ -119,6 +119,8 @@ def login():
         username = data.get('username')
         password = data.get('password')
 
+        print(f"Login attempt for username: {username}")
+
         # Validate input
         if not all([username, password]):
             return jsonify({"error": "Missing username or password"}), 400
@@ -127,12 +129,15 @@ def login():
         user, error_msg = auth_manager.login(username, password)
 
         if user:
+            print(f"Login successful for {username}, user_id={user.id}")
+            print(f"After login: current_user={current_user}, authenticated={current_user.is_authenticated}")
             return jsonify({
                 "message": "Login successful",
                 "user_id": user.id,
                 "username": user.username
             }), 200
         else:
+            print(f"Login failed for {username}: {error_msg}")
             return jsonify({"error": error_msg}), 401
 
     except Exception as e:
@@ -153,6 +158,31 @@ def logout():
     except Exception as e:
         print(f"Logout error: {str(e)}")
         return jsonify({"error": "Server error during logout"}), 500
+
+# Diagnostic route
+
+@app.route('/debug_login')
+def debug_login():  # Changed from test_login to debug_login
+    """Diagnostic route to check login functionality."""
+    try:
+        with Session() as session:
+            # Get first user
+            user = session.query(User).first()
+            if user:
+                login_user(user)  # We'll import this
+                print(f"Debug login: Logged in as {user.username}")
+                return jsonify({
+                    "status": "success",
+                    "message": f"Logged in as {user.username}",
+                    "authenticated": current_user.is_authenticated,
+                    "user_id": current_user.id
+                })
+            else:
+                print("Debug login: No users found")
+                return jsonify({"status": "error", "message": "No users found in database"})
+    except Exception as e:
+        print(f"Debug login error: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)})
 
 # --------------------------
 # User routes
@@ -983,6 +1013,14 @@ def profile():
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
+    # Add debugging to check current_user
+    print(f"Dashboard: current_user is {current_user}, authenticated={current_user.is_authenticated}")
+
+    # Safety check for current_user
+    if not current_user or not hasattr(current_user, 'id'):
+        print("Error: current_user is None or missing id attribute")
+        return redirect('/login')
+
     with Session() as session:
         try:
             # Get current user forms
@@ -1002,16 +1040,30 @@ def dashboard():
                 ).order_by(Comparison.id.desc()).limit(5).all()
 
                 for comp in comparisons:
-                    form1 = session.query(CompletedForm).get(comp.form1_id)
-                    form2 = session.query(CompletedForm).get(comp.form2_id)
-                    user1 = session.query(User).get(form1.user_id)
-                    user2 = session.query(User).get(form2.user_id)
+                    try:
+                        form1 = session.query(CompletedForm).get(comp.form1_id)
+                        form2 = session.query(CompletedForm).get(comp.form2_id)
 
-                    recent_comparisons.append({
-                        "id": comp.id,
-                        "user1": user1.username,
-                        "user2": user2.username
-                    })
+                        # Add NULL checks
+                        if not form1 or not form2:
+                            print(f"Warning: Missing forms for comparison {comp.id}")
+                            continue
+
+                        user1 = session.query(User).get(form1.user_id)
+                        user2 = session.query(User).get(form2.user_id)
+
+                        # Add NULL checks
+                        if not user1 or not user2:
+                            print(f"Warning: Missing users for comparison {comp.id}")
+                            continue
+
+                        recent_comparisons.append({
+                            "id": comp.id,
+                            "user1": user1.username,
+                            "user2": user2.username
+                        })
+                    except Exception as inner_e:
+                        print(f"Error processing comparison {comp.id}: {str(inner_e)}")
 
             return render_template(
                 'dashboard.html',
@@ -1090,7 +1142,6 @@ def view_comparison_page(comparison_id):
             # Log the error
             print(f"Error in view_comparison_page: {str(e)}")
             return jsonify({"error": f"Server error: {str(e)}"}), 500
-
 
 # --------------------------
 # Main
