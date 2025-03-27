@@ -278,26 +278,16 @@ def fill_form():
 # POST form
 
 @app.route('/completed_forms', methods=['POST'])
+@login_required
 def create_completed_form():
     try:
-        # Print the raw form data for debugging
-        print(f"Form data received: {request.form}")
-
         # Convert form data to a dictionary
         data = request.form.to_dict()
 
-        # Check if user_id is provided
-        if 'user_id' not in data:
-            return jsonify({"error": "Missing required field: user_id"}), 400
+        # Use the current logged-in user instead of the form field
+        user_id = current_user.id
 
-        # Validate and convert user_id to an integer
-        try:
-            user_id = int(data.get('user_id'))
-        except (ValueError, TypeError):
-            print(f"Invalid user_id: {data.get('user_id')}")
-            return jsonify({"error": "Invalid user_id: must be a valid integer"}), 400
-
-        # Check if user exists
+        # Check if user exists (shouldn't be necessary with @login_required)
         with Session() as session:
             user = session.query(User).get(user_id)
             if not user:
@@ -306,24 +296,21 @@ def create_completed_form():
         # Convert form data to a JSON string for storage
         content_json = json.dumps(data)
 
-        # Create the new form object with validated user_id and JSON content
+        # Create the new form object with the current user's ID
         new_form = CompletedForm(user_id=user_id, content=content_json)
 
-        # Add to database with proper session handling
+        # Add to database
         with Session() as session:
             try:
                 session.add(new_form)
                 session.commit()
-                # Return success response with the new form's ID
                 return jsonify({"message": "Form submitted successfully", "id": new_form.id}), 201
             except Exception as e:
-                # Handle database errors
                 session.rollback()
                 error_msg = str(e)
                 print(f"Database error: {error_msg}")
                 return jsonify({"error": f"Database error: {error_msg}"}), 500
     except Exception as e:
-        # Handle general errors
         error_msg = str(e)
         print(f"General error: {error_msg}")
         return jsonify({"error": f"Server error: {error_msg}"}), 500
