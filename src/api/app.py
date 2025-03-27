@@ -302,7 +302,7 @@ def create_comparison():
 # POST comparison of two forms
 
 @app.route('/compare_forms', methods=['POST'])
-def compare_user_forms():
+def compare_user_id_forms():
     """
     Compare two completed forms and identify potential conflicts.
 
