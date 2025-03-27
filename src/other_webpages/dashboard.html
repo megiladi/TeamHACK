@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamHACK - User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1>Welcome, {{ user.username }}</h1>
+                <p class="lead">Manage your TeamHACK forms and comparisons</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">My Forms</h5>
+                        <a href="/fill_form?user={{ user.username }}" class="btn btn-primary btn-sm">Create New Form</a>
+                    </div>
+                    <div class="card-body">
+                        {% if forms %}
+                            <ul class="list-group">
+                                {% for form in forms %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Form #{{ form.id }}
+                                        <div>
+                                            <a href="/view_form/{{ form.id }}" class="btn btn-outline-primary btn-sm">View</a>
+                                            <button class="btn btn-outline-danger btn-sm delete-form" data-id="{{ form.id }}">Delete</button>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-center">You haven't created any forms yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Comparisons</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newComparisonModal">New Comparison</button>
+                    </div>
+                    <div class="card-body">
+                        {% if comparisons %}
+                            <ul class="list-group">
+                                {% for comparison in comparisons %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ comparison.user1 }} vs {{ comparison.user2 }}
+                                        <a href="/comparisons/{{ comparison.id }}/view" class="btn btn-outline-primary btn-sm">View</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-center">No comparisons found.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Comparison Modal -->
+    <div class="modal fade" id="newComparisonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Comparison</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="compareForm">
+                        <div class="mb-3">
+                            <label for="user1" class="form-label">First User</label>
+                            <select class="form-select" id="user1" required>
+                                <option value="" selected disabled>Select user...</option>
+                                {% for u in all_users %}
+                                    <option value="{{ u.username }}">{{ u.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="user2" class="form-label">Second User</label>
+                            <select class="form-select" id="user2" required>
+                                <option value="" selected disabled>Select user...</option>
+                                {% for u in all_users %}
+                                    <option value="{{ u.username }}">{{ u.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Comparison</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form deletion
+        document.querySelectorAll('.delete-form').forEach(button => {
+            button.addEventListener('click', async function() {
+                if (confirm('Are you sure you want to delete this form?')) {
+                    const formId = this.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`/completed_forms/user/{{ user.username }}/${formId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            alert('Form deleted successfully!');
+                            location.reload();
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the form.');
+                    }
+                }
+            });
+        });
+
+        // New comparison form
+        document.getElementById('compareForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const user1 = document.getElementById('user1').value;
+            const user2 = document.getElementById('user2').value;
+
+            if (user1 === user2) {
+                alert('Please select two different users');
+                return;
+            }
+
+            try {
+                const response = await fetch('/compare_users/usernames', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username1: user1, username2: user2 })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    window.location.href = `/comparisons/${result.id}/view`;
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while creating the comparison.');
+            }
+        });
+    </script>
+</body>
+</html>

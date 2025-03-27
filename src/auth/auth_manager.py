@@ -21,6 +21,10 @@ class AuthManager:
         # Initialize password hashing
         self.bcrypt = Bcrypt(app)
 
+        # Track failed login attempts
+        self.failed_login_attempts = {}
+        self.last_attempt_time = {}
+
         # Set up user loader
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -38,7 +42,7 @@ class AuthManager:
 
     def register_user(self, username, email, password):
         """
-        Register a new user in the database.
+        Register a new user in the database with password validation.
 
         Args:
             username (str): Chosen username
@@ -48,6 +52,18 @@ class AuthManager:
         Returns:
             User or None: Created user object or None if registration fails
         """
+        # Validate password strength
+        if len(password) < 8:
+            return None, "Password must be at least 8 characters long"
+
+        # Simple check for password complexity
+        has_letters = any(c.isalpha() for c in password)
+        has_numbers = any(c.isdigit() for c in password)
+        has_special = any(not c.isalnum() for c in password)
+
+        if not (has_letters and (has_numbers or has_special)):
+            return None, "Password must contain letters and at least numbers or special characters"
+
         # Hash the password
         hashed_password = self.bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -59,7 +75,10 @@ class AuthManager:
                                  .first())
 
                 if existing_user:
-                    return None  # User already exists
+                    if existing_user.username == username:
+                        return None, f"Username '{username}' already exists"
+                    else:
+                        return None, f"Email '{email}' already exists"
 
                 # Create new user
                 new_user = User(
@@ -71,16 +90,16 @@ class AuthManager:
                 session.add(new_user)
                 session.commit()
 
-                return new_user
+                return new_user, None
 
             except Exception as e:
                 session.rollback()
                 print(f"Registration error: {e}")
-                return None
+                return None, f"Database error: {str(e)}"
 
     def login(self, username, password):
         """
-        Authenticate a user.
+        Authenticate a user with rate limiting.
 
         Args:
             username (str): User's username
@@ -89,17 +108,69 @@ class AuthManager:
         Returns:
             User or None: Authenticated user or None if login fails
         """
+        import time
+        from datetime import datetime, timedelta
+
+        # Check for too many failed attempts
+        current_time = datetime.now()
+        if username in self.failed_login_attempts:
+            # If user has failed more than 5 times
+            if self.failed_login_attempts[username] >= 5:
+                # Check if enough time has passed since last attempt
+                if username in self.last_attempt_time:
+                    time_since_last = current_time - self.last_attempt_time[username]
+                    if time_since_last < timedelta(minutes=15):
+                        # Account is temporarily locked
+                        return None, "Too many failed attempts. Please try again later."
+                    else:
+                        # Reset attempts after lockout period
+                        self.failed_login_attempts[username] = 0
+
+        # Update last attempt time
+        self.last_attempt_time[username] = current_time
+
         with Session() as session:
             user = session.query(User).filter_by(username=username).first()
 
             if user and self.bcrypt.check_password_hash(user.password, password):
-                login_user(user)
-                return user
+                # Successful login - reset failed attempts
+                if username in self.failed_login_attempts:
+                    self.failed_login_attempts[username] = 0
 
-            return None
+                login_user(user)
+                return user, None
+            else:
+                # Failed login - increment counter
+                if username not in self.failed_login_attempts:
+                    self.failed_login_attempts[username] = 1
+                else:
+                    self.failed_login_attempts[username] += 1
+
+                return None, "Invalid username or password"
 
     def logout(self):
         """
         Log out the current user.
         """
         logout_user()
+
+    def validate_password(self, password):
+        """
+        Validate password meets security requirements.
+
+        Args:
+            password (str): Password to validate
+
+        Returns:
+            tuple: (is_valid, message)
+        """
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters"
+
+        has_digit = any(char.isdigit() for char in password)
+        has_letter = any(char.isalpha() for char in password)
+
+        if not (has_digit and has_letter):
+            return False, "Password must contain both letters and numbers"
+
+        return True, "Password is valid"

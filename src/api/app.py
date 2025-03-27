@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect
 from flask_login import login_required, current_user
 import json
 
@@ -10,6 +10,7 @@ load_dotenv()
 from src.models.user import User
 from src.models.completed_form import CompletedForm
 from src.models.comparison import Comparison
+from src.db.db_setup import init_db
 from src.db.db_setup import Session
 from src.comparisons.comparison_engine import ComparisonEngine
 from src.auth.auth_manager import AuthManager
@@ -28,6 +29,9 @@ comparison_engine = ComparisonEngine(form_html_path)
 
 # Initialize Authentication Manager
 auth_manager = AuthManager(app)
+
+# Initialize database tables
+init_db()
 
 # --------------------------
 # Basic routes
@@ -50,9 +54,7 @@ def index():
 
 @app.route('/register', methods=['POST'])
 def register():
-    """
-    User registration route.
-    """
+    """User registration route."""
     try:
         data = request.json
         username = data.get('username')
@@ -64,7 +66,7 @@ def register():
             return jsonify({"error": "Missing required fields"}), 400
 
         # Attempt to register the user
-        user = auth_manager.register_user(username, email, password)
+        user, error_msg = auth_manager.register_user(username, email, password)
 
         if user:
             return jsonify({
@@ -72,7 +74,7 @@ def register():
                 "user_id": user.id
             }), 201
         else:
-            return jsonify({"error": "Username or email already exists"}), 409
+            return jsonify({"error": error_msg}), 409
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
@@ -82,9 +84,7 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    """
-    User login route.
-    """
+    """User login route."""
     try:
         data = request.json
         username = data.get('username')
@@ -95,7 +95,7 @@ def login():
             return jsonify({"error": "Missing username or password"}), 400
 
         # Attempt to log in the user
-        user = auth_manager.login(username, password)
+        user, error_msg = auth_manager.login(username, password)
 
         if user:
             return jsonify({
@@ -104,7 +104,7 @@ def login():
                 "username": user.username
             }), 200
         else:
-            return jsonify({"error": "Invalid username or password"}), 401
+            return jsonify({"error": error_msg}), 401
 
     except Exception as e:
         print(f"Login error: {str(e)}")
@@ -714,7 +714,91 @@ def get_comparison_by_usernames(username1, username2):
         except Exception as e:
             return jsonify({"error": f"Server error: {str(e)}"}), 500
 
-# GET visualization
+# --------------------------
+# Webpage routes
+# --------------------------
+
+# GET login page
+
+@app.route('/login', methods=['GET'])
+def login_page():
+    """Render the login page."""
+    if current_user.is_authenticated:
+        return redirect('/')
+    return render_template('login.html')
+
+# GET registration page
+
+@app.route('/register', methods=['GET'])
+def register_page():
+    """Render the registration page."""
+    if current_user.is_authenticated:
+        return redirect('/')
+    return render_template('register.html')
+
+# GET profile page
+
+@app.route('/profile', methods=['GET'])
+@login_required
+def profile():
+    """
+    User profile page - example of a protected route that requires login.
+    This is just a simple example for testing authentication.
+    """
+    return jsonify({
+        "message": "You are logged in!",
+        "user_id": current_user.id,
+        "username": current_user.username
+    }), 200
+
+# GET dashboard
+
+@app.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    with Session() as session:
+        try:
+            # Get current user forms
+            user_forms = session.query(CompletedForm).filter_by(user_id=current_user.id).all()
+
+            # Get all users for comparison selection
+            all_users = session.query(User).all()
+
+            # Get recent comparisons involving the current user
+            user_form_ids = [form.id for form in user_forms]
+            recent_comparisons = []
+
+            if user_form_ids:
+                comparisons = session.query(Comparison).filter(
+                    (Comparison.form1_id.in_(user_form_ids)) |
+                    (Comparison.form2_id.in_(user_form_ids))
+                ).order_by(Comparison.id.desc()).limit(5).all()
+
+                for comp in comparisons:
+                    form1 = session.query(CompletedForm).get(comp.form1_id)
+                    form2 = session.query(CompletedForm).get(comp.form2_id)
+                    user1 = session.query(User).get(form1.user_id)
+                    user2 = session.query(User).get(form2.user_id)
+
+                    recent_comparisons.append({
+                        "id": comp.id,
+                        "user1": user1.username,
+                        "user2": user2.username
+                    })
+
+            return render_template(
+                'dashboard.html',
+                user=current_user,
+                forms=user_forms,
+                comparisons=recent_comparisons,
+                all_users=all_users
+            )
+
+        except Exception as e:
+            print(f"Dashboard error: {str(e)}")
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# GET comparison visualization
 
 @app.route('/comparisons/<int:comparison_id>/view', methods=['GET'])
 def view_comparison_page(comparison_id):
@@ -748,6 +832,7 @@ def view_comparison_page(comparison_id):
             # Log the error
             print(f"Error in view_comparison_page: {str(e)}")
             return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 
 # --------------------------
 # Main
