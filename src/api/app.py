@@ -625,71 +625,36 @@ def get_comparison_by_usernames(username1, username2):
 
 @app.route('/comparisons/<int:comparison_id>/view', methods=['GET'])
 def view_comparison_page(comparison_id):
-    """
-    Render a visual comparison page for the specified comparison.
-
-    Args:
-        comparison_id: ID of the comparison to display
-    """
     with Session() as session:
         try:
-            # Debug prints
-            print(f"Fetching comparison with ID: {comparison_id}")
-
             comparison = session.query(Comparison).get(comparison_id)
             if not comparison:
-                print(f"Comparison not found: {comparison_id}")
                 return jsonify({"error": f"Comparison with ID {comparison_id} not found"}), 404
 
-            # Get the original forms
             form1 = session.query(CompletedForm).get(comparison.form1_id)
             form2 = session.query(CompletedForm).get(comparison.form2_id)
 
-            # Get user information
             user1 = session.query(User).get(form1.user_id)
             user2 = session.query(User).get(form2.user_id)
 
-            # Parse the form content and comparison result
+            # Parse JSON strings
             form1_content = json.loads(form1.content)
             form2_content = json.loads(form2.content)
             result = json.loads(comparison.result)
 
-            # Debug the data
-            print(f"Users: {user1.username} vs {user2.username}")
-            print(f"Result keys: {list(result.keys())}")
-            print(f"Conflict summary: {result['conflict_summary']}")
-
-            # Prepare template data
-            template_data = {
-                'comparison': {
-                    'id': comparison.id,
-                    'form1_id': comparison.form1_id,
-                    'form2_id': comparison.form2_id
-                },
-                'form1': form1_content,
-                'form2': form2_content,
-                'user1': {
-                    'id': user1.id,
-                    'username': user1.username,
-                    'email': user1.email
-                },
-                'user2': {
-                    'id': user2.id,
-                    'username': user2.username,
-                    'email': user2.email
-                },
-                'result': result
-            }
-
-            # Render the template
-            return render_template('comparison_result.html', **template_data)
+            return render_template(
+                'comparison_result.html',
+                result=result,
+                form1=form1_content,
+                form2=form2_content,
+                user1={'username': user1.username},
+                user2={'username': user2.username}
+            )
 
         except Exception as e:
-            import traceback
-            error_msg = str(e)
-            print(f"View error: {error_msg}")
-            print(traceback.format_exc())
-            return jsonify({"error": f"Server error: {error_msg}"}), 500
+            # Log the error
+            print(f"Error in view_comparison_page: {str(e)}")
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # --------------------------
 # Main
