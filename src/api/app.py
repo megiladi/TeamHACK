@@ -28,7 +28,7 @@ def index():
     """
     Route for the root URL, redirects to the form.
     """
-    return render_template('form.html')
+    return render_template('index.html')
 
 # --------------------------
 # User routes
@@ -96,6 +96,37 @@ def get_users():
             error_msg = str(e)
             print(f"Database error: {error_msg}")
             return jsonify({"error": f"Server error: {error_msg}"}), 500
+
+# GET user by username
+
+@app.route('/users/username/<string:username>', methods=['GET'])
+def get_user_by_username(username):
+    """
+    Get user details by username.
+
+    Args:
+        username: The username to look up
+
+    Returns:
+        JSON with user details or error
+    """
+    if not username:
+        return jsonify({"error": "Username parameter is required"}), 400
+
+    with Session() as session:
+        try:
+            user = session.query(User).filter_by(username=username).first()
+            if not user:
+                return jsonify({"error": f"User '{username}' not found"}), 404
+
+            # Return user details
+            return jsonify({
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            }), 200
+        except Exception as e:
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # --------------------------
 # Form routes
@@ -181,22 +212,39 @@ def get_completed_forms():
 
 # GET completed form by username
 
-@app.route('/forms/user/<string:username>', methods=['GET'])
-def get_forms_by_user(username):
+@app.route('/forms/user/<string:username>/latest', methods=['GET'])
+def get_latest_form_by_username(username):
+    """
+    Get the most recent form submitted by a user.
+
+    Args:
+        username: The username to look up
+
+    Returns:
+        JSON with the latest form or error
+    """
     if not username:
         return jsonify({"error": "Username parameter is required"}), 400
 
     with Session() as session:
         try:
+            # Find the user
             user = session.query(User).filter_by(username=username).first()
             if not user:
                 return jsonify({"error": f"User '{username}' not found"}), 404
 
-            forms = session.query(CompletedForm).filter_by(user_id=user.id).all()
-            if not forms:
-                return jsonify({"message": f"No forms found for user '{username}'", "forms": []}), 200
+            # Get their most recent form
+            latest_form = session.query(CompletedForm).filter_by(user_id=user.id).order_by(
+                CompletedForm.id.desc()).first()
+            if not latest_form:
+                return jsonify({"error": f"No forms found for user '{username}'"}), 404
 
-            return jsonify([{"id": f.id, "content": f.content} for f in forms]), 200
+            # Return the form
+            return jsonify({
+                "id": latest_form.id,
+                "user_id": latest_form.user_id,
+                "content": latest_form.content
+            }), 200
         except Exception as e:
             return jsonify({"error": f"Server error: {str(e)}"}), 500
 
@@ -570,6 +618,54 @@ def get_comparison_by_usernames(username1, username2):
 
         except Exception as e:
             return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# GET visualization
+@app.route('/comparisons/<int:comparison_id>/view', methods=['GET'])
+def view_comparison_page(comparison_id):
+    """
+    Render a visual comparison page for the specified comparison.
+
+    Args:
+        comparison_id: ID of the comparison to display
+
+    Returns:
+        HTML page with the comparison visualization
+    """
+    with Session() as session:
+        try:
+            comparison = session.query(Comparison).get(comparison_id)
+
+            if not comparison:
+                return jsonify({"error": f"Comparison with ID {comparison_id} not found"}), 404
+
+            # Get the original forms
+            form1 = session.query(CompletedForm).get(comparison.form1_id)
+            form2 = session.query(CompletedForm).get(comparison.form2_id)
+
+            # Get user information
+            user1 = session.query(User).get(form1.user_id)
+            user2 = session.query(User).get(form2.user_id)
+
+            # Parse the form content and comparison result
+            form1_content = json.loads(form1.content)
+            form2_content = json.loads(form2.content)
+            result = json.loads(comparison.result)
+
+            # Render the template with all data
+            return render_template(
+                'comparison_result.html',
+                comparison=comparison,
+                form1=form1_content,
+                form2=form2_content,
+                user1=user1,
+                user2=user2,
+                result=result
+            )
+
+        except Exception as e:
+            error_msg = str(e)
+            print(f"View error: {error_msg}")
+            return jsonify({"error": f"Server error: {error_msg}"}), 500
 
 # --------------------------
 # Main

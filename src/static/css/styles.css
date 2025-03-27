@@ -1,0 +1,51 @@
+/* Conflict indicators */
+.conflict-none {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+.conflict-low {
+    background-color: #fff9c4;
+    color: #f57f17;
+}
+.conflict-medium {
+    background-color: #ffecb3;
+    color: #ff6f00;
+}
+.conflict-high {
+    background-color: #ffcdd2;
+    color: #c62828;
+}
+
+/* Layout elements */
+.section-header {
+    background-color: #e0e0e0;
+    padding: 15px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+.comparison-card {
+    margin-bottom: 15px;
+    border-left: 4px solid #ccc;
+}
+
+/* Indicators */
+.conflict-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+}
+.conflict-indicator-none {
+    background-color: #4caf50;
+}
+.conflict-indicator-low {
+    background-color: #ffeb3b;
+}
+.conflict-indicator-medium {
+    background-color: #ff9800;
+}
+.conflict-indicator-high {
+    background-color: #f44336;
+}

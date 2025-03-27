@@ -1110,5 +1110,45 @@
         });
     });
     </script>
+<script>
+    // Set the user_id field based on URL parameter
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Extract the user parameter from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('user');
+
+        if (username) {
+            try {
+                // Fetch user details to get the ID
+                const response = await fetch(`/users/username/${username}`);
+                if (response.ok) {
+                    const userData = await response.json();
+
+                    // Find or create the user_id hidden field
+                    let userIdField = document.querySelector('input[name="user_id"]');
+
+                    if (!userIdField) {
+                        // Create the field if it doesn't exist
+                        userIdField = document.createElement('input');
+                        userIdField.type = 'hidden';
+                        userIdField.name = 'user_id';
+                        document.getElementById('teamHackForm').appendChild(userIdField);
+                    }
+
+                    // Set the user ID value
+                    userIdField.value = userData.id;
+
+                    // Optionally display a welcome message
+                    const formHeader = document.querySelector('h1.mb-4');
+                    if (formHeader) {
+                        formHeader.textContent = `TeamHACK Form - ${username}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        }
+    });
+</script>
 </body>
 </html>
