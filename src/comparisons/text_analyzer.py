@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -32,7 +33,7 @@ class TextAnalyzer:
     def analyze_text_similarity(self, text1, text2):
         """
         Analyze similarity between two text responses to identify discussion points.
-        Identifies potential discussion points even when answers appear aligned.
+        Uses a simplified three-state classification system: aligned, discuss, high_priority.
 
         Args:
             text1: First user's text response
@@ -45,20 +46,20 @@ class TextAnalyzer:
         if not text1 and not text2:
             return {
                 'similarity_score': 100,
-                'potential_conflicts': [],
-                'conflict_level': "none",
+                'potential_discussion_points': [],
+                'assessment': "aligned",
                 'explanation': "Both responses are empty",
                 'has_conflicts': False,
-                'discussion_recommendations': []
+                'recommendations': []
             }
         elif not text1 or not text2:
             return {
                 'similarity_score': 0,
-                'potential_conflicts': ["One response is empty while the other has content"],
-                'conflict_level': "medium",
-                'explanation': "One person provided input while the other didn't, which may indicate different engagement levels",
+                'potential_discussion_points': ["One response is empty while the other has content"],
+                'assessment': "discuss",
+                'explanation': "One person provided input while the other didn't",
                 'has_conflicts': True,
-                'discussion_recommendations': [
+                'recommendations': [
                     "Discuss: Expectations around participation and sharing perspectives"
                 ]
             }
@@ -74,42 +75,37 @@ class TextAnalyzer:
                 model = genai.GenerativeModel(model_name)
 
                 prompt = f"""
-                Analyze these two text responses from team members to identify discussion points for a team working together:
+                Analyze these two work style responses for potential collaboration friction:
 
                 PERSON 1: "{text1}"
 
                 PERSON 2: "{text2}"
 
-                IMPORTANT: Even when responses APPEAR aligned, there may be helpful things to discuss. The goal is to identify potential areas for discussion, not just conflicts.
+                CRITICAL GUIDELINES:
+                1. There are ONLY THREE possible assessment levels:
+                   - ALIGNED: Approaches are compatible or complementary
+                   - DISCUSS: Worth a conversation but not fundamentally problematic
+                   - HIGH PRIORITY: Critical difference that must be addressed
 
-                You must identify the following:
+                2. BE CONSERVATIVE with flagging conflicts:
+                   - Different but complementary approaches should be ALIGNED
+                   - Time preferences with ANY overlap should be ALIGNED
+                   - Only flag HIGH PRIORITY when a true blocker to collaboration exists
 
-                1. CONFLICTS: Actual differences that would cause workplace tension (e.g., different work-style preferences).
-                   - CONFLICT SEVERITY LEVELS:
-                     - NONE: Responses are truly aligned with no meaningful tension points
-                     - LOW: Minor differences that are easily reconciled
-                     - MEDIUM: Differences that need attention but aren't deal-breakers
-                     - HIGH: Significant differences that could cause real friction
-
-                2. DISCUSSION POINTS: Topics worth discussing even when no conflict exists. These don't change the conflict level but should be noted.
-
-                For EVERY pair of answers, identify any helpful discussion points, but DO NOT artificially inflate the conflict level. Many topics may be worth discussing even with a "none" conflict level.
+                Examples:
+                - Different problem-solving styles that complement each other = ALIGNED
+                - Overlapping productive times (10AM-2PM vs 11AM-6PM) = ALIGNED  
+                - One preferring structured meetings vs one preferring action-oriented meetings = DISCUSS
+                - Someone who needs silence to work vs someone who talks constantly = HIGH PRIORITY
 
                 Return a JSON object with exactly these fields:
-                1. similarity_score: A number from 0-100 indicating alignment (higher means more similar)
-                2. potential_conflicts: An array of strings describing all important issues to discuss
-                3. conflict_level: One of "none", "low", "medium", or "high" (use "none" if truly aligned)
-                4. explanation: A brief explanation of your assessment (50 words max)
-                5. discussion_recommendations: An array of specific things to discuss, each starting with "Discuss: "
-                6. has_blindspots: Boolean indicating if there are areas one person mentioned that the other didn't
+                1. assessment: ONLY "aligned", "discuss", or "high_priority"
+                2. potential_discussion_points: Array of specific items worth discussing
+                3. explanation: Brief explanation of your assessment (30 words max)
+                4. recommendations: 1-2 specific conversation topics if needed
+                5. similarity_score: A number from 0-100 indicating alignment (higher means more similar)
 
-                IMPORTANT EXAMPLES:
-                - If both people love intense work and have similar workaholic tendencies: conflict_level = "none", but still include discussion recommendations about boundaries
-                - If one person focuses more on work-life balance than the other: conflict_level = "low" or higher
-                - If work styles fundamentally differ: conflict_level = "medium" or "high"
-
-                Only use "low", "medium", or "high" conflict levels when there is an actual difference that could create tension. Don't inflate the conflict level just because there are things to discuss.
-
+                IMPORTANT: Default to ALIGNED unless there's clear evidence of friction.
                 Return ONLY valid JSON with no other text.
                 """
 
@@ -126,13 +122,11 @@ class TextAnalyzer:
                 # Parse JSON
                 result_json = json.loads(cleaned_text)
 
-                # Add has_conflicts flag based on conflict_level
-                result_json['has_conflicts'] = result_json.get('conflict_level') in ["low", "medium", "high"]
+                # Apply additional validation to prevent over-flagging
+                result_json = self.validate_assessment(result_json, text1, text2)
 
-                # Add recommendations to potential_conflicts to ensure they're seen by the comparison engine
-                for rec in result_json.get('discussion_recommendations', []):
-                    if rec not in result_json.get('potential_conflicts', []):
-                        result_json['potential_conflicts'].append(rec)
+                # Add has_conflicts flag based on assessment
+                result_json['has_conflicts'] = result_json.get('assessment') in ["discuss", "high_priority"]
 
                 return result_json
 
@@ -145,10 +139,46 @@ class TextAnalyzer:
         print(f"All Gemini model attempts failed. Last error: {str(last_error)}")
         return {
             'similarity_score': 50,
-            'potential_conflicts': [f"Analysis error: {str(last_error)}"],
-            'conflict_level': "none",  # Default to none for error case
+            'potential_discussion_points': [f"Analysis error: {str(last_error)}"],
+            'assessment': "aligned",  # Default to aligned for error case
             'explanation': "Could not complete analysis due to an error with the LLM service",
             'has_conflicts': False,
-            'discussion_recommendations': ["Discuss: Team members' work styles and expectations"],
+            'recommendations': ["Discuss: Team members' work styles and expectations"],
             'error': str(last_error)
         }
+
+    def validate_assessment(self, result, text1, text2):
+        """Additional validation to prevent over-flagging conflicts"""
+
+        # Time preference check - look for overlaps
+        time_patterns = [r'\d+\s*(am|pm)', r'\d+:\d+', r'morning', r'afternoon', r'evening']
+
+        times1 = []
+        times2 = []
+
+        for pattern in time_patterns:
+            times1.extend(re.findall(pattern, text1.lower()))
+            times2.extend(re.findall(pattern, text2.lower()))
+
+        # If both mention times and there's likely overlap, consider aligning
+        if times1 and times2 and result.get('assessment') == "discuss":
+            result['assessment'] = "aligned"
+            result['explanation'] = "Time preferences show potential compatibility."
+
+        # Check for complementary approaches in problem-solving
+        complementary_terms = [
+            ["brood", "truth seeking", "data driven", "structure"],
+            ["team", "collaborate", "coworking"],
+            ["sprint", "execute", "action", "implement"]
+        ]
+
+        # If terms from the same complementary group appear across both texts
+        for group in complementary_terms:
+            terms1 = [term for term in group if term in text1.lower()]
+            terms2 = [term for term in group if term in text2.lower()]
+
+            if terms1 and terms2 and result.get('assessment') == "discuss":
+                result['assessment'] = "aligned"
+                result['explanation'] = "Approaches appear complementary rather than conflicting."
+
+        return result

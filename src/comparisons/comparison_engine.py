@@ -3,7 +3,9 @@ from .likert_analyzer import compare_likert_scales
 from .ranking_analyzer import compare_rankings
 from .low_medium_high_analyzer import compare_low_medium_high_traits
 from .text_analyzer import TextAnalyzer
-from src.forms.form_metadata import FormMetadata, FIELD_TYPE_LIKERT, FIELD_TYPE_RANKING, FIELD_TYPE_TRAIT, FIELD_TYPE_TEXT, FIELD_TYPE_OTHER
+from src.forms.form_metadata import FormMetadata, FIELD_TYPE_LIKERT, FIELD_TYPE_RANKING, FIELD_TYPE_TRAIT, \
+    FIELD_TYPE_TEXT, FIELD_TYPE_OTHER
+
 
 class ComparisonEngine:
     """
@@ -85,9 +87,11 @@ class ComparisonEngine:
         results['likert_scales'][field_name] = compare_likert_scales(value1, value2)
 
         # Track conflicts
-        if results['likert_scales'][field_name].get('is_conflict'):
+        assessment = results['likert_scales'][field_name].get('assessment', 'aligned')
+        if assessment != "aligned":
             self._add_conflict(results, 'likert', field_name,
-                               results['likert_scales'][field_name]['difference'])
+                               results['likert_scales'][field_name]['difference'],
+                               assessment=assessment)
 
     def _analyze_ranking_field(self, field_name, value1, value2, results):
         """Analyze a ranking field."""
@@ -102,15 +106,16 @@ class ComparisonEngine:
         results['rankings'][group][field_name] = compare_rankings(value1, value2, max_rank)
 
         # Track conflicts
-        if results['rankings'][group][field_name].get('is_conflict'):
+        assessment = results['rankings'][group][field_name].get('assessment', 'aligned')
+        if assessment != "aligned":
             self._add_conflict(
                 results, 'ranking', field_name,
                 results['rankings'][group][field_name]['difference'],
                 group=group,
-                is_high_priority=results['rankings'][group][field_name].get('is_high_priority_conflict', False)
+                assessment=assessment
             )
 
-            if results['rankings'][group][field_name].get('is_high_priority_conflict'):
+            if assessment == "high_priority":
                 results['conflict_summary']['high_priority_conflicts'] += 1
 
     def _analyze_trait_field(self, field_name, value1, value2, results):
@@ -118,29 +123,40 @@ class ComparisonEngine:
         results['traits'][field_name] = compare_low_medium_high_traits(value1, value2)
 
         # Track conflicts
-        if results['traits'][field_name].get('is_conflict'):
+        assessment = results['traits'][field_name].get('assessment', 'aligned')
+        if assessment != "aligned":
             self._add_conflict(results, 'trait', field_name,
-                               results['traits'][field_name]['difference'])
+                               results['traits'][field_name]['difference'],
+                               assessment=assessment)
 
     def _analyze_text_field(self, field_name, value1, value2, results):
         """Analyze a free text field using the LLM."""
         results['free_text'][field_name] = self.text_analyzer.analyze_text_similarity(value1, value2)
 
         # Track conflicts
-        if results['free_text'][field_name].get('has_conflicts'):
+        assessment = results['free_text'][field_name].get('assessment', 'aligned')
+        if assessment != "aligned":
             self._add_conflict(
                 results, 'free_text', field_name,
-                conflict_level=results['free_text'][field_name].get('conflict_level', 'unknown')
+                assessment=assessment
             )
 
     def _add_conflict(self, results, type_name, field_name, difference=None, group=None,
-                      is_high_priority=False, conflict_level=None):
+                      assessment="aligned", conflict_level=None):
         """Add a conflict to the summary."""
-        results['conflict_summary']['total_conflicts'] += 1
+
+        # Only count non-aligned items as conflicts
+        if assessment != "aligned":
+            results['conflict_summary']['total_conflicts'] += 1
+
+        # Track high priority conflicts separately
+        if assessment == "high_priority":
+            results['conflict_summary']['high_priority_conflicts'] += 1
 
         conflict = {
             'type': type_name,
-            'field': field_name
+            'field': field_name,
+            'assessment': assessment
         }
 
         if difference is not None:
@@ -149,21 +165,15 @@ class ComparisonEngine:
         if group:
             conflict['group'] = group
 
-        if is_high_priority:
-            conflict['is_high_priority'] = True
-
-        if conflict_level:
-            conflict['conflict_level'] = conflict_level
-
         results['conflict_summary']['conflict_areas'].append(conflict)
 
     def _generate_overall_assessment(self, results):
         """Generate overall assessment based on conflicts found."""
         if results['conflict_summary']['high_priority_conflicts'] > 0:
-            results['conflict_summary']['overall_assessment'] = "High potential for conflict in key areas"
+            results['conflict_summary']['overall_assessment'] = "High priority issues need to be addressed"
         elif results['conflict_summary']['total_conflicts'] > 5:
-            results['conflict_summary']['overall_assessment'] = "Moderate potential for conflict"
+            results['conflict_summary']['overall_assessment'] = "Several items to discuss"
         elif results['conflict_summary']['total_conflicts'] > 0:
-            results['conflict_summary']['overall_assessment'] = "Some areas of potential difference"
+            results['conflict_summary']['overall_assessment'] = "Some discussion points to explore"
         else:
             results['conflict_summary']['overall_assessment'] = "Highly compatible"

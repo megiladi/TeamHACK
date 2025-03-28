@@ -530,7 +530,7 @@
                     const conflict = result.conflict_summary.conflict_areas.find(area => area.field === field);
 
                     if (conflict) {
-                        if (conflict.is_high_priority) {
+                        if (conflict.assessment === "high_priority") {
                             return {
                                 isConflict: true,
                                 status: "priority",
@@ -538,12 +538,14 @@
                                 class: "badge-priority"
                             };
                         }
-                        return {
-                            isConflict: true,
-                            status: "discuss",
-                            label: "Discuss",
-                            class: "badge-discuss"
-                        };
+                        else if (conflict.assessment === "discuss") {
+                            return {
+                                isConflict: true,
+                                status: "discuss",
+                                label: "Discuss",
+                                class: "badge-discuss"
+                            };
+                        }
                     }
                 }
 
@@ -912,7 +914,6 @@
             document.getElementById('print-comparison').addEventListener('click', function() {
                 window.print();
             });
-        });
     </script>
 </body>
 </html>
