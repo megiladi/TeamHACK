@@ -69,20 +69,42 @@ class TextAnalyzer:
                 model = genai.GenerativeModel(model_name)
                 
                 prompt = f"""
-                Analyze these two text responses from team members for potential conflicts in work style, communication preferences, or values:
+                Analyze these two text responses from team members for SIGNIFICANT conflicts in work style, communication preferences, or values:
 
                 PERSON 1: "{text1}"
 
                 PERSON 2: "{text2}"
 
-                Focus on identifying differences that might cause workplace conflicts or misalignments when these people collaborate.
+                Flag two types of issues:
+                
+                1. MAJOR CONFLICTS: Identify major differences between team members that would likely cause workplace conflicts or serious misalignments when these people collaborate.
+                
+                2. DISCUSSION POINTS: Flag important individual traits or behaviors mentioned by either person that would benefit from team discussion, even if they don't conflict with the other person (e.g., if someone mentions they're often late, have unusual working hours, or other notable work habits).
+
+                Ignore minor stylistic differences, slight variations in preferences, or differences that are complementary rather than conflicting.
+
+                A conflict should only be flagged if it represents a fundamental incompatibility in working styles that would require explicit discussion to resolve.
+
+                Examples of issues to flag:
+                - One person strongly prefers solo work while the other insists on constant collaboration
+                - One person values detailed planning while the other believes in complete spontaneity
+                - Fundamentally opposed communication styles (e.g., direct vs highly diplomatic)
+                - One person mentions they struggle with punctuality or meeting deadlines
+                - Someone notes they have atypical working hours or special requirements
+
+                Examples of minor differences to IGNORE:
+                - Small variations in preferences that can easily coexist
+                - Stylistic differences that don't impact collaboration
+                - Complementary traits that could balance each other
 
                 Return a JSON object with exactly these fields:
                 1. similarity_score: A number from 0-100 indicating overall alignment (higher means more similar)
-                2. potential_conflicts: An array of strings describing specific potential conflict areas
+                2. potential_conflicts: An array of strings describing potential major conflicts or important discussion points (empty array if none)
                 3. conflict_level: One of "none", "low", "medium", or "high"
                 4. explanation: A brief explanation of your assessment (50 words max)
 
+                Be conservative in your assessment. When in doubt, rate the conflict level lower.
+                However, always flag individual traits that would need team discussion.
                 Return ONLY valid JSON with no other text.
                 """
 
@@ -101,7 +123,7 @@ class TextAnalyzer:
                 result_json = json.loads(cleaned_text)
 
                 # Add has_conflicts flag based on conflict_level
-                result_json['has_conflicts'] = result_json.get('conflict_level') in ("medium", "high")
+                result_json['has_conflicts'] = result_json.get('conflict_level') == "high"
 
                 return result_json
 
