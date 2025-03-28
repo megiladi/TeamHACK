@@ -137,6 +137,7 @@ python -m pytest tests/
 ## Future Potential Enhancements
 
 #### Scaling and Efficiency
+- Clean app.py file to break out into more modular architecture (i.e., blueprints and services)
 - Cloud-based storage for remote form completion
 - Dynamic form handling to enable the underlying form template to be changed
 - Increased capacity (50+ users)
@@ -149,6 +150,7 @@ python -m pytest tests/
 - Improved and increased triaging of conflicts by priority level
 - Aged form flagging (12+ months)
 - Ability to delete past comparisons
+- Automatically reload dashboard once a form is deleted
 - Navigation bar following user as they scroll down 
 - Audio version for accessibility
 - Ability to delete users
