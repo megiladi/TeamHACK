@@ -40,6 +40,7 @@ TeamHACK/
 │   ├── api/                  # API endpoints
 │   ├── auth/                 # Authentication system
 │   ├── comparisons/          # Comparison algorithms
+│   ├── config.py             # Configuration management
 │   ├── db/                   # Database setup and operations
 │   ├── forms/                # Form metadata and processing
 │   └── models/               # Data models

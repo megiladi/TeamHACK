@@ -22,7 +22,7 @@ from src.models.comparison import Comparison
 from src.db.db_setup import init_db, Session
 from src.comparisons.comparison_engine import ComparisonEngine
 from src.auth.auth_manager import AuthManager
-
+from src.config import get_config
 
 # -------------------------
 # Application Setup
@@ -53,9 +53,15 @@ def create_app():
     """Create and configure the Flask application."""
     template_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'webpages'))
     app = Flask(__name__, template_folder=template_folder)
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-    app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
+
+    # Import config settings
+    from src.config import get_config
+    app_config = get_config()
+    app.config.from_object(app_config)
+
+    # Keep the jinja environment configuration
     app.jinja_env.autoescape = True
+
     return app
 
 
