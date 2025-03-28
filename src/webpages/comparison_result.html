@@ -224,7 +224,7 @@
                         "Goals & Motivation": ["professional_goals", "motivations", "success_definition", "work_life_balance"],
                         "Strengths and Opportunities / Glow and Grow": ["strengths", "improvement_areas", "support_growth"],
                         "Working Style": [
-                            "work_preference", "productivity_peaks", 
+                            "work_preference", "productivity_peaks",
                             "rank_opposing", "rank_supporting", "rank_suggesting", "rank_asking",
                             "rank_relationships", "rank_process", "rank_task",
                             "internal_problem_solving", "decision_making"
@@ -249,10 +249,10 @@
                     ],
                     subsections: {
                         "Trust & Relationships": ["build_trust", "break_trust", "relationship_value"],
-                        "Feedback and Conflict": ["give_feedback", "receive_feedback", "conflict_approach", 
+                        "Feedback and Conflict": ["give_feedback", "receive_feedback", "conflict_approach",
                             "diffuse_defense"],
                         "Working and Meeting Preferences": ["collaboration_preference", "convince_me", "ideal_meeting", "meeting_prep", "meeting_expectations"],
-                        "Communication Preferences": ["preferred_channels", "response_time", "best_times", 
+                        "Communication Preferences": ["preferred_channels", "response_time", "best_times",
                             "currency_language", "receive_updates", "give_updates"]
                     }
                 },
@@ -655,12 +655,12 @@
                         sectionHeader.className = 'section-header';
                         sectionHeader.textContent = sectionTitle;
                         comparisonContent.appendChild(sectionHeader);
-                        
+
                         // Track that we've added it
                         openEndedAdded = true;
-                        
+
                         // Also add to conflicts view if needed
-                        if (result.conflict_summary && result.conflict_summary.conflict_areas && 
+                        if (result.conflict_summary && result.conflict_summary.conflict_areas &&
                             result.conflict_summary.conflict_areas.length > 0) {
                             const conflictSectionHeader = document.createElement('div');
                             conflictSectionHeader.className = 'section-header';
@@ -680,7 +680,7 @@
                     sectionHeader.className = 'section-header';
                     sectionHeader.textContent = sectionTitle;
                     comparisonContent.appendChild(sectionHeader);
-                    
+
                     // Add description if available
                     if (section.description) {
                         const descriptionEl = document.createElement('div');
@@ -698,7 +698,7 @@
                             subsectionHeader.className = 'subsection-header';
                             subsectionHeader.textContent = subsectionTitle;
                             comparisonContent.appendChild(subsectionHeader);
-                            
+
                             // Create table for this subsection
                             const table = document.createElement('table');
                             table.className = 'comparison-table';
@@ -719,7 +719,7 @@
                             // Fill the table with fields
                             subsectionFields.forEach(field => {
                                 if (!fields.includes(field)) return; // Skip if not in this section's fields
-                                
+
                                 const value1 = form1[field] || '';
                                 const value2 = form2[field] || '';
 
@@ -747,7 +747,7 @@
                                     <td><span class="${status.class}">${status.label}</span></td>
                                 `;
                                 tableBody.appendChild(row);
-                                
+
                                 // Add to conflicts view if it's a conflict
                                 if (status.isConflict) {
                                     addToConflictsView(field, fieldLabel, displayValue1, displayValue2, status, sectionTitle, subsectionTitle);
@@ -810,27 +810,27 @@
                         });
                     }
                 }
-                
+
                 // Helper function to add conflicts to conflicts view
                 function addToConflictsView(field, fieldLabel, displayValue1, displayValue2, status, sectionTitle, subsectionTitle = null) {
                     // Keep track of added sections and subsections
                     if (!this.conflictSections) {
                         this.conflictSections = {};
                     }
-                    
+
                     // If section not already added
                     if (!this.conflictSections[sectionTitle]) {
                         const sectionHeader = document.createElement('div');
                         sectionHeader.className = 'section-header';
                         sectionHeader.textContent = sectionTitle;
                         conflictsContent.appendChild(sectionHeader);
-                        
+
                         this.conflictSections[sectionTitle] = {
                             added: true,
                             subsections: {}
                         };
                     }
-                    
+
                     // If subsection title provided
                     if (subsectionTitle) {
                         if (!this.conflictSections[sectionTitle].subsections[subsectionTitle]) {
@@ -838,7 +838,7 @@
                             subsectionHeader.className = 'subsection-header';
                             subsectionHeader.textContent = subsectionTitle;
                             conflictsContent.appendChild(subsectionHeader);
-                            
+
                             // Create table
                             const table = document.createElement('table');
                             table.className = 'comparison-table';
@@ -854,12 +854,12 @@
                                 <tbody></tbody>
                             `;
                             conflictsContent.appendChild(table);
-                            
+
                             this.conflictSections[sectionTitle].subsections[subsectionTitle] = {
                                 table: table
                             };
                         }
-                        
+
                         // Add row to subsection table
                         const row = document.createElement('tr');
                         row.className = 'conflict';
@@ -887,10 +887,10 @@
                                 <tbody></tbody>
                             `;
                             conflictsContent.appendChild(table);
-                            
+
                             this.conflictSections[sectionTitle].table = table;
                         }
-                        
+
                         // Add row to section table
                         const row = document.createElement('tr');
                         row.className = 'conflict';
