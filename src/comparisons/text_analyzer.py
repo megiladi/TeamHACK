@@ -98,13 +98,12 @@ class TextAnalyzer:
                    - "DISCUSS" should identify meaningful tensions, not just any difference
                    - HIGH_PRIORITY should be rare and limited to truly incompatible approaches
 
-                3. COMMON ASSESSMENT CORRECTIONS (learn from these examples)
-                   - Both valuing honesty/transparency = ALIGNED (even with different wording)
+                3. COMMON ASSESSMENT CORRECTIONS (learn from these examples):
+                   - Both discuss different ways of relaxing but they're different = ALIGNED (different ways of relaxing shouldn't cause issues)
                    - Both mentioning trust based on follow-through and transparency (even if only one mentions lies of omissions) = ALIGNED
                    - Direct vs to-the-point feedback approaches = ALIGNED (similar core approach)
-                   - Direct but with kindness in feedback vs to-the-point = DISCUSS (potential for misalignment given the kindness element and uncertainty around how the other will handle)
                    - Direct but with kindness in feedback vs to-the-point but with no sugar coating = DISCUSS (potential for misalignment given the kindness element directly contradicting the no sugar coating)
-                   - One mentioning ADHD/lateness without conflicting with other's stated needs = DISCUSS (being late is something that can bother many people, so good to confirm if it's an issue)
+                   - One mentioning lateness without conflicting with other's stated needs = DISCUSS (being late is something that can bother many people, so good to confirm if it's an issue)
                    - One mentions work-life balance and the other only about working = DISCUSS (potential source of tension)
                    - Stress signals are rarely HIGH_PRIORITY unless fundamentally incompatible
 
