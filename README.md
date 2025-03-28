@@ -6,6 +6,9 @@ TeamHACK is a tool designed to proactively identify and address potential confli
 ## Purpose
 Transform potential workplace conflicts into team strengths by facilitating upfront discussions about working preferences and styles. The tool guides structured conversations that lead to better team dynamics.
 
+#### Note: The goal  is not to create hivemind
+#### The goal is to take differences that have the potential to (A) make a team complimentary and amazing, but that can also (B) create conflict if left unattended, and make sure it does the former without the latter
+
 ## Target Users
 Internal team members expecting to work together for more than 2 weeks.
 
