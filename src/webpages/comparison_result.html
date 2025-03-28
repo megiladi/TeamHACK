@@ -179,7 +179,13 @@
                         "brainstorming_preference", "feeling_preference", "chat_scheduling",
                         "communication_medium", "updating_style", "asking_style",
                         "building_preference", "praise_preference"
-                    ]
+                    ],
+                    subsections: {
+                        "Timing": ["timing_preference", "working_hours"],
+                        "Relaxing & Brainstorming": ["relax_preference", "brainstorming_preference", "feeling_preference"],
+                        "Chatting & Communication": ["chat_scheduling", "communication_medium", "updating_style", "asking_style"],
+                        "Building & Praise": ["building_preference", "praise_preference"]
+                    }
                 },
                 {
                     title: "The Culture I Come From",
@@ -188,7 +194,16 @@
                         "thinking_preference", "orientation_preference", "leading_preference",
                         "deciding_preference", "trusting_preference", "disagreeing_preference",
                         "scheduling_preference"
-                    ]
+                    ],
+                    subsections: {
+                        "Communication & Thinking": ["speaking_preference", "listening_preference", "tough_news_preference", "thinking_preference"],
+                        "Work & Decision-Making": ["orientation_preference", "leading_preference", "deciding_preference", "scheduling_preference", "trusting_preference", "disagreeing_preference"]
+                    }
+                },
+                {
+                    title: "Open Ended Detail",
+                    fields: [],
+                    description: ""
                 },
                 {
                     title: "About Me",
@@ -203,7 +218,24 @@
                         "rank_independence", "ocean_openness", "ocean_conscientiousness",
                         "ocean_extroversion", "ocean_agreeableness", "ocean_neuroticism",
                         "misunderstood_aspects", "outside_interests"
-                    ]
+                    ],
+                    subsections: {
+                        "Goals & Motivation": ["professional_goals", "motivations", "success_definition", "work_life_balance"],
+                        "Strengths and Opportunities / Glow and Grow": ["strengths", "improvement_areas", "support_growth"],
+                        "Working Style": [
+                            "work_preference", "productivity_peaks", 
+                            "rank_opposing", "rank_supporting", "rank_suggesting", "rank_asking",
+                            "rank_relationships", "rank_process", "rank_task",
+                            "internal_problem_solving", "decision_making"
+                        ],
+                        "Stress & Support": ["stress_signs", "support_preference", "recharge_methods"],
+                        "Habits, Quirks, and More!": [
+                            "work_habits",
+                            "rank_equity", "rank_harm", "rank_people", "rank_consistency", "rank_order", "rank_independence",
+                            "ocean_openness", "ocean_conscientiousness", "ocean_extroversion", "ocean_agreeableness", "ocean_neuroticism",
+                            "misunderstood_aspects", "outside_interests"
+                        ]
+                    }
                 },
                 {
                     title: "About Us",
@@ -213,7 +245,15 @@
                         "collaboration_preference", "convince_me", "ideal_meeting", "meeting_prep",
                         "meeting_expectations", "preferred_channels", "response_time", "best_times",
                         "currency_language", "receive_updates", "give_updates"
-                    ]
+                    ],
+                    subsections: {
+                        "Trust & Relationships": ["build_trust", "break_trust", "relationship_value"],
+                        "Feedback and Conflict": ["give_feedback", "receive_feedback", "conflict_approach", 
+                            "diffuse_defense"],
+                        "Working and Meeting Preferences": ["collaboration_preference", "convince_me", "ideal_meeting", "meeting_prep", "meeting_expectations"],
+                        "Communication Preferences": ["preferred_channels", "response_time", "best_times", 
+                            "currency_language", "receive_updates", "give_updates"]
+                    }
                 },
                 {
                     title: "Self-Added Information",
@@ -224,61 +264,61 @@
             // Field label mappings
             const fieldLabels = {
                 // Core fields
-                "timing_preference": "Early Bird vs Night Owl",
-                "working_hours": "Set vs Flexible Working Hours",
-                "relax_preference": "Relax with Others vs Alone",
-                "brainstorming_preference": "External vs Internal Processor",
-                "feeling_preference": "Process Events with Others vs Moving On",
-                "chat_scheduling": "Scheduled Chats vs Interruptions",
-                "communication_medium": "Video/Call vs Text/Slack",
-                "updating_style": "Full Story vs Cut to Chase",
-                "asking_style": "Full Context vs Direct Needs",
-                "building_preference": "Ship Fast & Learn vs Learn First, Then Ship",
-                "praise_preference": "Private vs Public Praise",
+                "timing_preference": "Early Bird - Night Owl",
+                "working_hours": "Set Working Hours - Flexible Working Hours",
+                "relax_preference": "Relax with Others - Relax Alone",
+                "brainstorming_preference": "Think Together (External Processor) - Think Alone (Internal Processor)",
+                "feeling_preference": "Process What Happened with You - Move On",
+                "chat_scheduling": "Schedule to Chat - Interrupt (I Welcome It!)",
+                "communication_medium": "Video Chat/Call - Slack/Text",
+                "updating_style": "Full Story - Cut to Chase",
+                "asking_style": "Full Context - Direct Needs",
+                "building_preference": "Ship It and Learn - Learn and then Ship It",
+                "praise_preference": "Private Praise - Public Praise",
 
                 // Culture fields
-                "speaking_preference": "Explicit vs Implicit Communication",
-                "listening_preference": "Literal vs Interpretive Listening",
-                "tough_news_preference": "Direct vs Gentle with Tough News",
-                "thinking_preference": "Theory First vs Example First",
-                "orientation_preference": "Journey vs Destination Focus",
-                "leading_preference": "Servant vs Authority Leadership",
-                "deciding_preference": "Group vs Leader Decision Making",
-                "trusting_preference": "Performance vs Relationship Trust",
-                "disagreeing_preference": "Embrace/Confront vs Avoid Disagreement",
-                "scheduling_preference": "Plan and Execute vs Flexible Planning",
+                "speaking_preference": "If I don't say it, don't assume it - Read the subtext",
+                "listening_preference": "Take literally - With grain of salt",
+                "tough_news_preference": "Be direct - Hint gently",
+                "thinking_preference": "Theory first (Deduction) - Example first (Induction)",
+                "orientation_preference": "Journey (Experience) - Destination (Accomplish)",
+                "leading_preference": "Servant Leadership (Flipped Pyramid/Flat) - Authority Leadership (Typical Pyramid/Top-Down)",
+                "deciding_preference": "Group Decision Making - Leader Decision Making",
+                "trusting_preference": "Performance Trust - Relationship Trust",
+                "disagreeing_preference": "Embrace/Confront Disagreement - Avoid Disagreement",
+                "scheduling_preference": "Plan and Execute - Flexible Planning",
 
                 // Goal fields
-                "professional_goals": "Professional Goals",
-                "motivations": "Work Motivations",
-                "success_definition": "Definition of Success",
-                "work_life_balance": "Work-Life Balance Approach",
+                "professional_goals": "My professional goals",
+                "motivations": "What motivates me at work",
+                "success_definition": "How I define success",
+                "work_life_balance": "My approach to work-life balance",
 
                 // Strength fields
-                "strengths": "Top Strengths",
-                "improvement_areas": "Areas for Improvement",
-                "support_growth": "Support Needed for Growth",
+                "strengths": "What I believe are my top strengths",
+                "improvement_areas": "Areas where I'd like to improve",
+                "support_growth": "How others can support my growth",
 
                 // Working style
-                "work_preference": "Preferred Work Environment",
-                "productivity_peaks": "Productivity Peaks",
-                "rank_opposing": "Problem-Solving: Opposing/Challenging",
-                "rank_supporting": "Problem-Solving: Supporting/Encouraging",
-                "rank_suggesting": "Problem-Solving: Suggesting/Actioning",
-                "rank_asking": "Problem-Solving: Asking/Reflecting",
-                "rank_relationships": "Priority: Relationships and Trust",
-                "rank_process": "Priority: Process Excellence",
-                "rank_task": "Priority: Task Completion",
-                "internal_problem_solving": "Problem-Solving Approach",
-                "decision_making": "Decision-Making Process",
+                "work_preference": "My preferred work environment",
+                "productivity_peaks": "When I'm most productive",
+                "rank_opposing": "How often I approach problems by opposing/challenging",
+                "rank_supporting": "How often I approach problems by supporting/encouraging",
+                "rank_suggesting": "How often I approach problems by suggesting/actioning",
+                "rank_asking": "How often I approach problems by asking/reflecting",
+                "rank_relationships": "How I prioritize relationships and trust",
+                "rank_process": "How I prioritize process excellence",
+                "rank_task": "How I prioritize task completion",
+                "internal_problem_solving": "My problem-solving approach",
+                "decision_making": "My decision-making process",
 
                 // Stress and support
-                "stress_signs": "Signs of Stress/Overwhelm",
-                "support_preference": "Support During Challenges",
-                "recharge_methods": "Methods to Recharge",
+                "stress_signs": "Signs I'm stressed or overwhelmed",
+                "support_preference": "How to support me during challenges",
+                "recharge_methods": "How I recharge",
 
                 // Habits and values
-                "work_habits": "Specific Work Habits",
+                "work_habits": "Specific work habits or preferences",
                 "rank_equity": "Value: Protect Equity/Fairness",
                 "rank_harm": "Value: Avoid Harm",
                 "rank_people": "Value: Protect People/In-group",
@@ -293,28 +333,28 @@
                 "ocean_agreeableness": "Personality: Agreeableness",
                 "ocean_neuroticism": "Personality: Neuroticism",
 
-                "misunderstood_aspects": "Commonly Misunderstood Aspects",
-                "outside_interests": "Life Outside Work",
+                "misunderstood_aspects": "What others commonly misunderstand about me",
+                "outside_interests": "My life outside work",
 
                 // About us
-                "build_trust": "Building Trust",
-                "break_trust": "Breaking Trust",
-                "relationship_value": "Valued in Relationships",
-                "give_feedback": "Giving Feedback",
-                "receive_feedback": "Receiving Feedback",
-                "conflict_approach": "Conflict Approach",
-                "diffuse_defense": "Diffusing Defensiveness",
-                "collaboration_preference": "Collaboration Preferences",
-                "convince_me": "Convincing Approach",
-                "ideal_meeting": "Ideal Meeting",
-                "meeting_prep": "Meeting Preparation",
-                "meeting_expectations": "Meeting Expectations",
-                "preferred_channels": "Communication Channels",
-                "response_time": "Response Time",
-                "best_times": "Best Contact Times",
-                "currency_language": "Communication Style",
-                "receive_updates": "Receiving Updates",
-                "give_updates": "Giving Updates",
+                "build_trust": "How to build trust with me",
+                "break_trust": "How to break trust with me",
+                "relationship_value": "What I value in working relationships",
+                "give_feedback": "How I prefer to give feedback",
+                "receive_feedback": "How I prefer to receive feedback",
+                "conflict_approach": "My approach to conflict",
+                "diffuse_defense": "How to diffuse my defensiveness",
+                "collaboration_preference": "How I prefer to collaborate",
+                "convince_me": "Best way to convince me",
+                "ideal_meeting": "My ideal meeting",
+                "meeting_prep": "My meeting preparation preference",
+                "meeting_expectations": "My expectations for meetings",
+                "preferred_channels": "My preferred communication channels",
+                "response_time": "My expected response time",
+                "best_times": "Best times to contact me",
+                "currency_language": "My communication style",
+                "receive_updates": "How I prefer to receive updates",
+                "give_updates": "How I prefer to give updates",
 
                 // Self-added
                 "self_added": "Additional Information"
@@ -339,8 +379,55 @@
                     },
                     "feeling_preference": {
                         "1": "Process with Others", "2": "Sometimes", "3": "Move On Quickly"
+                    },
+                    "chat_scheduling": {
+                        "1": "Schedule to Chat", "2": "Mix of Both", "3": "Interrupt (I Welcome It!)"
+                    },
+                    "communication_medium": {
+                        "1": "Video Chat/Call", "2": "Mix of Both", "3": "Slack/Text"
+                    },
+                    "updating_style": {
+                        "1": "Full Story", "2": "Balanced", "3": "Cut to Chase"
+                    },
+                    "asking_style": {
+                        "1": "Full Context", "2": "Some Context", "3": "Direct Needs"
+                    },
+                    "building_preference": {
+                        "1": "Ship It and Learn", "2": "Balanced Approach", "3": "Learn and then Ship It"
+                    },
+                    "praise_preference": {
+                        "1": "Private Praise", "2": "Mix of Both", "3": "Public Praise"
+                    },
+                    "speaking_preference": {
+                        "1": "If I don't say it, don't assume it", "2": "Balanced", "3": "Read the subtext"
+                    },
+                    "listening_preference": {
+                        "1": "Take literally", "2": "Mixed", "3": "With grain of salt"
+                    },
+                    "tough_news_preference": {
+                        "1": "Be direct", "2": "Balanced", "3": "Hint gently"
+                    },
+                    "thinking_preference": {
+                        "1": "Theory first (Deduction)", "2": "Balanced", "3": "Example first (Induction)"
+                    },
+                    "orientation_preference": {
+                        "1": "Journey (Experience)", "2": "Balanced", "3": "Destination (Accomplish)"
+                    },
+                    "leading_preference": {
+                        "1": "Servant Leadership (Flipped Pyramid/Flat)", "2": "Balanced", "3": "Authority Leadership (Typical Pyramid/Top-Down)"
+                    },
+                    "deciding_preference": {
+                        "1": "Group Decision", "2": "Collaborative", "3": "Leader Decision"
+                    },
+                    "trusting_preference": {
+                        "1": "Performance Trust", "2": "Balanced", "3": "Relationship Trust"
+                    },
+                    "disagreeing_preference": {
+                        "1": "Embrace/Confront", "2": "Selective", "3": "Avoid Disagreement"
+                    },
+                    "scheduling_preference": {
+                        "1": "Plan and Execute", "2": "Adaptable", "3": "Flexible Planning"
                     }
-                    // Add more as needed
                 };
 
                 if (likertMappings[field] && likertMappings[field][value]) {
@@ -552,104 +639,268 @@
                     delete sectionFields["Other"];
                 }
 
+                // ALWAYS create the Open Ended Detail section, regardless of content
+                let openEndedAdded = false;
+
                 // Process each section
                 for (const section of formSections) {
                     const sectionTitle = section.title;
                     const fields = sectionFields[sectionTitle];
 
-                    // Skip empty sections
-                    if (!fields || fields.length === 0) continue;
+                    // Special handling for "Open Ended Detail" section - always show it
+                    if (section.title === "Open Ended Detail") {
+                        // Create section header for comparison view
+                        const sectionHeader = document.createElement('div');
+                        sectionHeader.className = 'section-header';
+                        sectionHeader.textContent = sectionTitle;
+                        comparisonContent.appendChild(sectionHeader);
+                        
+                        // Track that we've added it
+                        openEndedAdded = true;
+                        
+                        // Also add to conflicts view if needed
+                        if (result.conflict_summary && result.conflict_summary.conflict_areas && 
+                            result.conflict_summary.conflict_areas.length > 0) {
+                            const conflictSectionHeader = document.createElement('div');
+                            conflictSectionHeader.className = 'section-header';
+                            conflictSectionHeader.textContent = sectionTitle;
+                            conflictsContent.appendChild(conflictSectionHeader);
+                        }
+                        continue;
+                    }
+
+                    // Skip empty sections (except Open Ended Detail, which we handled above)
+                    if (!fields || fields.length === 0) {
+                        continue;
+                    }
 
                     // Create section header for comparison view
                     const sectionHeader = document.createElement('div');
                     sectionHeader.className = 'section-header';
                     sectionHeader.textContent = sectionTitle;
                     comparisonContent.appendChild(sectionHeader);
+                    
+                    // Add description if available
+                    if (section.description) {
+                        const descriptionEl = document.createElement('div');
+                        descriptionEl.className = 'alert alert-secondary mb-4';
+                        descriptionEl.innerHTML = section.description;
+                        comparisonContent.appendChild(descriptionEl);
+                    }
 
-                    // Create table for this section
-                    const table = document.createElement('table');
-                    table.className = 'comparison-table';
-                    table.innerHTML = `
-                        <thead>
-                            <tr>
-                                <th width="30%">Field</th>
-                                <th width="25%">${user1.username}</th>
-                                <th width="25%">${user2.username}</th>
-                                <th width="20%">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    `;
-                    comparisonContent.appendChild(table);
-                    const tableBody = table.querySelector('tbody');
+                    // If subsections exist for this section, organize by subsections
+                    if (section.subsections) {
+                        // For each subsection
+                        for (const [subsectionTitle, subsectionFields] of Object.entries(section.subsections)) {
+                            // Create subsection header
+                            const subsectionHeader = document.createElement('div');
+                            subsectionHeader.className = 'subsection-header';
+                            subsectionHeader.textContent = subsectionTitle;
+                            comparisonContent.appendChild(subsectionHeader);
+                            
+                            // Create table for this subsection
+                            const table = document.createElement('table');
+                            table.className = 'comparison-table';
+                            table.innerHTML = `
+                                <thead>
+                                    <tr>
+                                        <th width="30%">Field</th>
+                                        <th width="25%">${user1.username}</th>
+                                        <th width="25%">${user2.username}</th>
+                                        <th width="20%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            `;
+                            comparisonContent.appendChild(table);
+                            const tableBody = table.querySelector('tbody');
 
-                    // Variables for conflict section
-                    let conflictSectionAdded = false;
-                    let conflictTable = null;
+                            // Fill the table with fields
+                            subsectionFields.forEach(field => {
+                                if (!fields.includes(field)) return; // Skip if not in this section's fields
+                                
+                                const value1 = form1[field] || '';
+                                const value2 = form2[field] || '';
 
-                    // Process fields in this section
-                    fields.forEach(field => {
-                        const value1 = form1[field] || '';
-                        const value2 = form2[field] || '';
+                                // Skip if both values are empty
+                                if (!value1 && !value2) return;
 
-                        // Skip if both values are empty
-                        if (!value1 && !value2) return;
+                                // Get formatted values and field label
+                                const displayValue1 = getFormattedValue(field, value1);
+                                const displayValue2 = getFormattedValue(field, value2);
+                                const fieldLabel = getFieldLabel(field);
 
-                        // Get formatted values and field label
-                        const displayValue1 = getFormattedValue(field, value1);
-                        const displayValue2 = getFormattedValue(field, value2);
-                        const fieldLabel = getFieldLabel(field);
+                                // Determine conflict status
+                                const status = getConflictStatus(field, value1, value2);
 
-                        // Determine conflict status
-                        const status = getConflictStatus(field, value1, value2);
+                                // Create row
+                                const row = document.createElement('tr');
+                                if (status.isConflict) {
+                                    row.className = 'conflict';
+                                }
 
-                        // Create row for comparison view
-                        const row = document.createElement('tr');
-                        if (status.isConflict) {
-                            row.className = 'conflict';
+                                row.innerHTML = `
+                                    <td>${fieldLabel}</td>
+                                    <td>${displayValue1}</td>
+                                    <td>${displayValue2}</td>
+                                    <td><span class="${status.class}">${status.label}</span></td>
+                                `;
+                                tableBody.appendChild(row);
+                                
+                                // Add to conflicts view if it's a conflict
+                                if (status.isConflict) {
+                                    addToConflictsView(field, fieldLabel, displayValue1, displayValue2, status, sectionTitle, subsectionTitle);
+                                }
+                            });
                         }
+                    } else {
+                        // Standard section without subsections
+                        // Create table for this section
+                        const table = document.createElement('table');
+                        table.className = 'comparison-table';
+                        table.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th width="30%">Field</th>
+                                    <th width="25%">${user1.username}</th>
+                                    <th width="25%">${user2.username}</th>
+                                    <th width="20%">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        `;
+                        comparisonContent.appendChild(table);
+                        const tableBody = table.querySelector('tbody');
 
+                        // Process fields in this section
+                        fields.forEach(field => {
+                            const value1 = form1[field] || '';
+                            const value2 = form2[field] || '';
+
+                            // Skip if both values are empty
+                            if (!value1 && !value2) return;
+
+                            // Get formatted values and field label
+                            const displayValue1 = getFormattedValue(field, value1);
+                            const displayValue2 = getFormattedValue(field, value2);
+                            const fieldLabel = getFieldLabel(field);
+
+                            // Determine conflict status
+                            const status = getConflictStatus(field, value1, value2);
+
+                            // Create row for comparison view
+                            const row = document.createElement('tr');
+                            if (status.isConflict) {
+                                row.className = 'conflict';
+                            }
+
+                            row.innerHTML = `
+                                <td>${fieldLabel}</td>
+                                <td>${displayValue1}</td>
+                                <td>${displayValue2}</td>
+                                <td><span class="${status.class}">${status.label}</span></td>
+                            `;
+                            tableBody.appendChild(row);
+
+                            // Add to conflicts view if it's a conflict
+                            if (status.isConflict) {
+                                addToConflictsView(field, fieldLabel, displayValue1, displayValue2, status, sectionTitle);
+                            }
+                        });
+                    }
+                }
+                
+                // Helper function to add conflicts to conflicts view
+                function addToConflictsView(field, fieldLabel, displayValue1, displayValue2, status, sectionTitle, subsectionTitle = null) {
+                    // Keep track of added sections and subsections
+                    if (!this.conflictSections) {
+                        this.conflictSections = {};
+                    }
+                    
+                    // If section not already added
+                    if (!this.conflictSections[sectionTitle]) {
+                        const sectionHeader = document.createElement('div');
+                        sectionHeader.className = 'section-header';
+                        sectionHeader.textContent = sectionTitle;
+                        conflictsContent.appendChild(sectionHeader);
+                        
+                        this.conflictSections[sectionTitle] = {
+                            added: true,
+                            subsections: {}
+                        };
+                    }
+                    
+                    // If subsection title provided
+                    if (subsectionTitle) {
+                        if (!this.conflictSections[sectionTitle].subsections[subsectionTitle]) {
+                            const subsectionHeader = document.createElement('div');
+                            subsectionHeader.className = 'subsection-header';
+                            subsectionHeader.textContent = subsectionTitle;
+                            conflictsContent.appendChild(subsectionHeader);
+                            
+                            // Create table
+                            const table = document.createElement('table');
+                            table.className = 'comparison-table';
+                            table.innerHTML = `
+                                <thead>
+                                    <tr>
+                                        <th width="30%">Field</th>
+                                        <th width="25%">${user1.username}</th>
+                                        <th width="25%">${user2.username}</th>
+                                        <th width="20%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            `;
+                            conflictsContent.appendChild(table);
+                            
+                            this.conflictSections[sectionTitle].subsections[subsectionTitle] = {
+                                table: table
+                            };
+                        }
+                        
+                        // Add row to subsection table
+                        const row = document.createElement('tr');
+                        row.className = 'conflict';
                         row.innerHTML = `
                             <td>${fieldLabel}</td>
                             <td>${displayValue1}</td>
                             <td>${displayValue2}</td>
                             <td><span class="${status.class}">${status.label}</span></td>
                         `;
-                        tableBody.appendChild(row);
-
-                        // Add to conflicts view if it's a conflict
-                        if (status.isConflict) {
-                            // If this is the first conflict in this section, add section header
-                            if (!conflictSectionAdded) {
-                                const conflictHeader = document.createElement('div');
-                                conflictHeader.className = 'section-header';
-                                conflictHeader.textContent = sectionTitle;
-                                conflictsContent.appendChild(conflictHeader);
-
-                                // Create conflict table
-                                conflictTable = document.createElement('table');
-                                conflictTable.className = 'comparison-table';
-                                conflictTable.innerHTML = `
-                                    <thead>
-                                        <tr>
-                                            <th width="30%">Field</th>
-                                            <th width="25%">${user1.username}</th>
-                                            <th width="25%">${user2.username}</th>
-                                            <th width="20%">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                `;
-                                conflictsContent.appendChild(conflictTable);
-
-                                conflictSectionAdded = true;
-                            }
-
-                            // Add conflict row
-                            const conflictRow = row.cloneNode(true);
-                            conflictTable.querySelector('tbody').appendChild(conflictRow);
+                        this.conflictSections[sectionTitle].subsections[subsectionTitle].table.querySelector('tbody').appendChild(row);
+                    } else {
+                        // No subsection
+                        if (!this.conflictSections[sectionTitle].table) {
+                            const table = document.createElement('table');
+                            table.className = 'comparison-table';
+                            table.innerHTML = `
+                                <thead>
+                                    <tr>
+                                        <th width="30%">Field</th>
+                                        <th width="25%">${user1.username}</th>
+                                        <th width="25%">${user2.username}</th>
+                                        <th width="20%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            `;
+                            conflictsContent.appendChild(table);
+                            
+                            this.conflictSections[sectionTitle].table = table;
                         }
-                    });
+                        
+                        // Add row to section table
+                        const row = document.createElement('tr');
+                        row.className = 'conflict';
+                        row.innerHTML = `
+                            <td>${fieldLabel}</td>
+                            <td>${displayValue1}</td>
+                            <td>${displayValue2}</td>
+                            <td><span class="${status.class}">${status.label}</span></td>
+                        `;
+                        this.conflictSections[sectionTitle].table.querySelector('tbody').appendChild(row);
+                    }
                 }
             }
 
