@@ -485,6 +485,87 @@ def get_latest_form_by_username(username):
         except Exception as e:
             return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+# GET edit form
+
+@app.route('/edit_form/<int:form_id>', methods=['GET'])
+@login_required
+def edit_form(form_id):
+    """Route to edit a specific form."""
+    with Session() as session:
+        try:
+            # Get the form
+            form = session.query(CompletedForm).get(form_id)
+
+            if not form:
+                return jsonify({"error": f"Form with ID {form_id} not found"}), 404
+
+            # Make sure the current user owns this form
+            if form.user_id != current_user.id:
+                return jsonify({"error": "You don't have permission to edit this form"}), 403
+
+            # Get the user who owns the form
+            user = session.query(User).get(form.user_id)
+
+            # Parse form content if it's stored as a JSON string
+            form_content = json.loads(form.content) if isinstance(form.content, str) else form.content
+
+            # Render the edit form template with pre-filled data
+            return render_template(
+                'edit_form.html',
+                form_id=form.id,
+                username=user.username,
+                form_content=form_content
+            )
+
+        except Exception as e:
+            print(f"Error editing form: {str(e)}")
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+
+# PUT/POST update form
+
+@app.route('/api/forms/<int:form_id>', methods=['PUT', 'POST'])
+@login_required
+def update_form(form_id):
+    """API route to update an existing form."""
+    logger.debug(f"API request to update form {form_id} by user {current_user.username}")
+
+    try:
+        # Convert form data to a dictionary
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+
+        with Session() as session:
+            # Find the form
+            form = session.query(CompletedForm).get(form_id)
+            if not form:
+                logger.warning(f"Form with ID {form_id} not found")
+                return jsonify({"error": f"Form with ID {form_id} not found"}), 404
+
+            # Check if the form belongs to the current user
+            if form.user_id != current_user.id:
+                logger.warning(
+                    f"User {current_user.username} attempted to update form {form_id} belonging to user {form.user_id}")
+                return jsonify({"error": "You don't have permission to update this form"}), 403
+
+            # Convert form data to a JSON string for storage
+            content_json = json.dumps(data)
+
+            # Update the form content
+            form.content = content_json
+
+            # Commit the changes
+            session.commit()
+            logger.info(f"Form {form_id} successfully updated by user {current_user.username}")
+
+            return jsonify({"message": f"Form updated successfully"}), 200
+
+    except Exception as e:
+        logger.error(f"Error updating form {form_id}: {str(e)}", exc_info=True)
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 # DELETE form
 
 @app.route('/completed_forms/user/<string:username>/<int:form_id>', methods=['DELETE'])

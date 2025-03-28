@@ -4,49 +4,860 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Form - TeamHACK</title>
+    <!-- Bootstrap CSS for responsive styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Using system fonts similar to the original document */
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .likert-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+
+        .likert-label-left {
+            width: 200px;
+            text-align: right;
+            padding-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .likert-label-right {
+            width: 200px;
+            text-align: left;
+            padding-left: 20px;
+            flex-shrink: 0;
+        }
+
+        .likert-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex: 0 0 120px;
+        }
+
+        .likert-marker {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #6c757d;
+            display: inline-block;
+        }
+
+        .likert-marker.selected {
+            background-color: #0d6efd;
+            border: 1px solid #0b5ed7;
+            box-shadow: 0 0 0 2px #ffffff;
+        }
+
+        .section-header {
+            background-color: #e0e0e0;
+            padding: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .subsection-header {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .form-label {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .response-text {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 2.5rem;
+            min-height: 80px;
+        }
+
+        h3 {
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ranking-section {
+            margin-bottom: 2rem;
+        }
+
+        .ranking-title {
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .ranking-label {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .ranking-value {
+            font-weight: bold;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .trait-item {
+            display: flex;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .trait-label {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .trait-value {
+            font-weight: bold;
+            min-width: 100px;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <!-- Main container for the form -->
+    <div class="container mt-5 mb-5">
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container-fluid">
-        <span class="navbar-brand">TeamHACK</span>
-        <a href="/dashboard" class="btn btn-outline-primary btn-sm">Dashboard</a>
-    </div>
-</nav>
-
-        <h1 class="mb-4">Form Details</h1>
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">{{ username }}'s Form (#{{ form_id }})</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Field</th>
-                                <th>Response</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for field, value in form_content.items() %}
-                            {% if field != 'user_id' %}
-                            <tr>
-                                <td>{{ field }}</td>
-                                <td>{{ value }}</td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="container-fluid">
+                <span class="navbar-brand">TeamHACK</span>
+                <div>
+                    <a href="/dashboard" class="btn btn-outline-primary btn-sm me-2">Dashboard</a>
+                    <a href="/edit_form/{{ form_id }}" class="btn btn-outline-secondary btn-sm">Edit Form</a>
                 </div>
+            </div>
+        </nav>
+        <h1 class="mb-4">View Form</h1>
+        <h4 class="mb-4">{{ username }}'s Form (#{{ form_id }})</h4>
+
+        <!-- Introduction Section -->
+        <div class="mb-4">
+            <div class="alert alert-info">
+                <p>This is a read-only view of the TeamHACK form submitted by {{ username }}. This form captures their working preferences, communication style, and other important details that help foster better team collaboration.</p>
+            </div>
+        </div>
+
+        <!-- My Best Working Self Section -->
+        <div class="section-header">
+            <h2>My Best Working Self at a Glance</h2>
+            <p>This section reflects how {{ username }} presents at work on their best day.</p>
+        </div>
+
+        <div class="mb-4 mt-4">
+            <h3>Timing</h3>
+
+            <!-- Likert Scales - Early Bird vs Night Owl -->
+            <div class="likert-container">
+                <div class="likert-label-left">Early Bird</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('timing_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('timing_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('timing_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Night Owl</div>
+            </div>
+
+            <!-- Set Working Hours vs Flexible Hours Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Set Working Hours</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('working_hours') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('working_hours') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('working_hours') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Flexible Working Hours</div>
             </div>
         </div>
 
         <div class="mb-4">
-            <a href="/dashboard" class="btn btn-primary">Dashboard</a>
+            <h3>Relaxing & Brainstorming</h3>
+
+            <!-- Relax Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Relax with Others</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('relax_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('relax_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('relax_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Relax Alone</div>
+            </div>
+
+            <!-- Brainstorming Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Think Together (External Processor)</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('brainstorming_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('brainstorming_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('brainstorming_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Think Alone (Internal Processor)</div>
+            </div>
+
+            <!-- Feeling Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Process What Happened with You</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('feeling_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('feeling_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('feeling_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Move On</div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h3>Chatting & Communication</h3>
+
+            <!-- Chat Scheduling Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Schedule to Chat</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('chat_scheduling') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('chat_scheduling') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('chat_scheduling') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Interrupt (I Welcome It!)</div>
+            </div>
+
+            <!-- Communication Medium Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Video Chat/Call</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('communication_medium') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('communication_medium') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('communication_medium') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Slack/Text</div>
+            </div>
+
+            <!-- Updating Style Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">When Updating, Tell Story</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('updating_style') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('updating_style') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('updating_style') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">When Updating, Cut to the Chase</div>
+            </div>
+
+            <!-- Asking Style Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">When Asking, Give Me All the Context</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('asking_style') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('asking_style') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('asking_style') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">When Asking, Just Tell Me What You Need</div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h3>Building & Praise</h3>
+
+            <!-- Building Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Ship It and Learn</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('building_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('building_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('building_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Learn and then Ship It</div>
+            </div>
+
+            <!-- Praise Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Private Praise</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('praise_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('praise_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('praise_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Public Praise</div>
+            </div>
+        </div>
+
+        <!-- The Culture I Come From Section -->
+        <div class="section-header">
+            <h2>The Culture I Come From</h2>
+            <p>This section reflects {{ username }}'s cultural background and how it shapes their work approach.</p>
+        </div>
+
+        <div class="mb-4 mt-4">
+            <h3>Communication & Thinking</h3>
+
+            <!-- Speaking Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">If I don't say it, don't assume it</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('speaking_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('speaking_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('speaking_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Read the subtext</div>
+            </div>
+
+            <!-- Listening Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Take literally</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('listening_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('listening_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('listening_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">With grain of salt</div>
+            </div>
+
+            <!-- Tough News Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Be direct</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('tough_news_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('tough_news_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('tough_news_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Hint gently</div>
+            </div>
+
+            <!-- Thinking Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Theory first (Deduction)</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('thinking_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('thinking_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('thinking_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Example first (Induction)</div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h3>Work & Decision-Making</h3>
+
+            <!-- Orientation Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Journey (Experience)</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('orientation_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('orientation_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('orientation_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Destination (Accomplish)</div>
+            </div>
+
+            <!-- Leading Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Servant Leadership (Flipped Pyramid / Flat)</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('leading_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('leading_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('leading_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Authority Leadership (Typical Pyramid / Top-Down)</div>
+            </div>
+
+            <!-- Deciding Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Group</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('deciding_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('deciding_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('deciding_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Leader</div>
+            </div>
+
+            <!-- Trusting Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Performance</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('trusting_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('trusting_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('trusting_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Relationship</div>
+            </div>
+
+            <!-- Disagreeing Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Embrace/Confront</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('disagreeing_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('disagreeing_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('disagreeing_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Avoid</div>
+            </div>
+
+            <!-- Scheduling Preference Likert Scale -->
+            <div class="likert-container">
+                <div class="likert-label-left">Plan and Execute</div>
+                <div class="likert-options">
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('scheduling_preference') == '1' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('scheduling_preference') == '2' }}"></div>
+                    </div>
+                    <div class="likert-option">
+                        <div class="likert-marker {{ 'selected' if form_content.get('scheduling_preference') == '3' }}"></div>
+                    </div>
+                </div>
+                <div class="likert-label-right">Plan but Be Flexible</div>
+            </div>
+        </div>
+
+        <!-- Open-Ended Detail Section -->
+        <div class="section-header">
+            <h2>Open-Ended Detail</h2>
+        </div>
+
+        <!-- Me Section Header -->
+        <div class="subsection-header">
+            <h2>About Me</h2>
+        </div>
+
+        <!-- Goals and Motivations -->
+        <h3>Goals and Motivations</h3>
+
+        <div class="mb-4">
+            <label class="form-label">My current professional goals</label>
+            <div class="response-text">{{ form_content.get('professional_goals', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">What motivates me in my work</label>
+            <div class="response-text">{{ form_content.get('motivations', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How I define success</label>
+            <div class="response-text">{{ form_content.get('success_definition', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How work-life balance factors into my approach</label>
+            <div class="response-text">{{ form_content.get('work_life_balance', 'Not provided') }}</div>
+        </div>
+
+        <!-- Strengths and Opportunities -->
+        <h3>Strengths and Opportunities / Glow and Grow</h3>
+
+        <div class="mb-4">
+            <label class="form-label">What I believe are my top strengths</label>
+            <div class="response-text">{{ form_content.get('strengths', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Areas where I'm working to improve</label>
+            <div class="response-text">{{ form_content.get('improvement_areas', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How others can support my growth</label>
+            <div class="response-text">{{ form_content.get('support_growth', 'Not provided') }}</div>
+        </div>
+
+        <!-- Working Style -->
+        <h3>Working Style</h3>
+
+        <div class="mb-4">
+            <label class="form-label">How I prefer to work (e.g., alone, in teams)</label>
+            <div class="response-text">{{ form_content.get('work_preference', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">My productivity peaks (e.g., morning person, night owl)</label>
+            <div class="response-text">{{ form_content.get('productivity_peaks', 'Not provided') }}</div>
+        </div>
+
+        <div class="ranking-section">
+            <div class="ranking-title">How I typically show up during problem-solving (Rank 1-4, where 1 is most common)</div>
+            {% set problem_solving_fields = ['rank_opposing', 'rank_supporting', 'rank_suggesting', 'rank_asking'] %}
+            {% set problem_solving_labels = {
+                'rank_opposing': 'Opposing / Challenging',
+                'rank_supporting': 'Supporting / Encouraging',
+                'rank_suggesting': 'Suggesting / Actioning',
+                'rank_asking': 'Asking / Reflecting'
+            } %}
+
+            {% for field in problem_solving_fields %}
+                {% if form_content.get(field) %}
+                <div class="ranking-item">
+                    <div class="ranking-label">{{ problem_solving_labels[field] }}</div>
+                    <div class="ranking-value">
+                        {% if form_content.get(field) == '1' %}
+                            1 (Most)
+                        {% elif form_content.get(field) == '4' %}
+                            4 (Least)
+                        {% else %}
+                            {{ form_content.get(field) }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="ranking-section">
+            <div class="ranking-title">How I typically prioritize while problem-solving (Rank 1-3, where 1 is highest priority)</div>
+            {% set prioritize_fields = ['rank_relationships', 'rank_process', 'rank_task'] %}
+            {% set prioritize_labels = {
+                'rank_relationships': 'Relationships and trust',
+                'rank_process': 'Process excellence',
+                'rank_task': 'Task completion'
+            } %}
+
+            {% for field in prioritize_fields %}
+                {% if form_content.get(field) %}
+                <div class="ranking-item">
+                    <div class="ranking-label">{{ prioritize_labels[field] }}</div>
+                    <div class="ranking-value">
+                        {% if form_content.get(field) == '1' %}
+                            1 (Highest)
+                        {% elif form_content.get(field) == '3' %}
+                            3 (Lowest)
+                        {% else %}
+                            {{ form_content.get(field) }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="ranking-section">
+            <div class="ranking-title">Values Ranking (Rank 1-6, where 1 is most important)</div>
+            {% set values_fields = ['rank_equity', 'rank_harm', 'rank_people', 'rank_consistency', 'rank_order', 'rank_independence'] %}
+            {% set values_labels = {
+                'rank_equity': 'Protect equity / fairness',
+                'rank_harm': 'Avoid harm',
+                'rank_people': 'Protect your people / in-group',
+                'rank_consistency': 'Protect consistency / purity',
+                'rank_order': 'Protect order / authority',
+                'rank_independence': 'Protect independence / liberty'
+            } %}
+
+            {% for field in values_fields %}
+                {% if form_content.get(field) %}
+                <div class="ranking-item">
+                    <div class="ranking-label">{{ values_labels[field] }}</div>
+                    <div class="ranking-value">
+                        {% if form_content.get(field) == '1' %}
+                            1 (Most)
+                        {% elif form_content.get(field) == '6' %}
+                            6 (Least)
+                        {% else %}
+                            Priority {{ form_content.get(field) }} of 6
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- OCEAN Assessment -->
+        <h3>OCEAN 5 Personality Traits</h3>
+        <div class="mb-4">
+            {% set ocean_fields = ['ocean_openness', 'ocean_conscientiousness', 'ocean_extroversion', 'ocean_agreeableness', 'ocean_neuroticism'] %}
+            {% set ocean_labels = {
+                'ocean_openness': 'Openness',
+                'ocean_conscientiousness': 'Conscientiousness',
+                'ocean_extroversion': 'Extroversion',
+                'ocean_agreeableness': 'Agreeableness',
+                'ocean_neuroticism': 'Neuroticism'
+            } %}
+
+            {% for field in ocean_fields %}
+                {% if form_content.get(field) %}
+                <div class="trait-item">
+                    <div class="trait-label">{{ ocean_labels[field] }}</div>
+                    <div class="trait-value">{{ form_content.get(field)|title }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Us Section Header -->
+        <div class="subsection-header">
+            <h2>About Us</h2>
+        </div>
+
+        <!-- Trust and Relationships -->
+        <h3>Trust and Relationships</h3>
+
+        <div class="mb-4">
+            <label class="form-label">How to build trust with me</label>
+            <div class="response-text">{{ form_content.get('build_trust', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Actions or behaviors that may break my trust</label>
+            <div class="response-text">{{ form_content.get('break_trust', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">What I value most in professional relationships</label>
+            <div class="response-text">{{ form_content.get('relationship_value', 'Not provided') }}</div>
+        </div>
+
+        <!-- Feedback and Conflict -->
+        <h3>Feedback and Conflict</h3>
+
+        <div class="mb-4">
+            <label class="form-label">How I prefer to give feedforward</label>
+            <div class="response-text">{{ form_content.get('give_feedback', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How I prefer to receive feedforward</label>
+            <div class="response-text">{{ form_content.get('receive_feedback', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">My approach to conflicts or disagreements</label>
+            <div class="response-text">{{ form_content.get('conflict_approach', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How to help me diffuse if I get defensive</label>
+            <div class="response-text">{{ form_content.get('diffuse_defense', 'Not provided') }}</div>
+        </div>
+
+        <!-- Working and Meeting Preferences -->
+        <h3>Working and Meeting Preferences</h3>
+
+        <div class="mb-4">
+            <label class="form-label">How I prefer to collaborate (e.g., alone first, live)</label>
+            <div class="response-text">{{ form_content.get('collaboration_preference', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How to best convince me</label>
+            <div class="response-text">{{ form_content.get('convince_me', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">My ideal meeting structure</label>
+            <div class="response-text">{{ form_content.get('ideal_meeting', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How I like to prepare for meetings</label>
+            <div class="response-text">{{ form_content.get('meeting_prep', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">My expectations for meetings and their outcomes</label>
+            <div class="response-text">{{ form_content.get('meeting_expectations', 'Not provided') }}</div>
+        </div>
+
+        <!-- Communication Preferences -->
+        <h3>Communication Preferences</h3>
+
+        <div class="mb-4">
+            <label class="form-label">Preferred communication channels (e.g., email, ping, text, call)</label>
+            <div class="response-text">{{ form_content.get('preferred_channels', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Response time expectations</label>
+            <div class="response-text">{{ form_content.get('response_time', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Best times to reach me</label>
+            <div class="response-text">{{ form_content.get('best_times', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">My "currency" / language / things I understand best</label>
+            <div class="response-text">{{ form_content.get('currency_language', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How I like to receive updates and information</label>
+            <div class="response-text">{{ form_content.get('receive_updates', 'Not provided') }}</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">How I like to give updates and information</label>
+            <div class="response-text">{{ form_content.get('give_updates', 'Not provided') }}</div>
+        </div>
+
+        <!-- Self-Added Section -->
+        <div class="section-header">
+            <h2>Self-Added Information</h2>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Additional information</label>
+            <div class="response-text">{{ form_content.get('self_added', 'No additional information provided') }}</div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="d-flex justify-content-between mt-5 mb-5">
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+            <!-- If you want to add an edit button in the future -->
+            <!-- <a href="/edit_form/{{ form_id }}" class="btn btn-secondary">Edit Form</a> -->
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // This function would parse URL params if needed
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+    </script>
 </body>
 </html>

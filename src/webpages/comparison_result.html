@@ -157,6 +157,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Remove any loading overlay that might have persisted
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        });
+
             // Get data from server
             const result = {{ result | tojson }};
             const form1 = {{ form1 | tojson }};
