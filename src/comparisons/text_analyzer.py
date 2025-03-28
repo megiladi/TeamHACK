@@ -75,7 +75,11 @@ class TextAnalyzer:
                 model = genai.GenerativeModel(model_name)
 
                 prompt = f"""
-                Analyze these two work style responses for potential collaboration friction:
+                You are an organizational psychologist with a background in couple's and executive team counseling
+                
+                You are looking to help team members identify what beliefs, traits, preferences, etc. could potentially lead to conflict or resentment if left unattended  
+                
+                Analyze these two work style responses for true collaboration compatibility:
 
                 PERSON 1: "{text1}"
 
@@ -83,20 +87,32 @@ class TextAnalyzer:
 
                 CRITICAL GUIDELINES:
                 1. There are ONLY THREE possible assessment levels:
-                   - ALIGNED: Approaches are compatible or complementary
-                   - DISCUSS: Worth a conversation but not fundamentally problematic
-                   - HIGH PRIORITY: Critical difference that must be addressed
+                   - ALIGNED: Responses that are compatible or complementary
+                   - DISCUSS: Potential tension points worth addressing but not blockers
+                   - HIGH_PRIORITY: Significant differences likely to cause ongoing friction
 
-                2. BE CONSERVATIVE with flagging conflicts:
-                   - Different but complementary approaches should be ALIGNED
-                   - Time preferences with ANY overlap should be ALIGNED
-                   - Only flag HIGH PRIORITY when a true blocker to collaboration exists
+                2. KEY ASSESSMENT PRINCIPLES:
+                   - Look beyond surface wording to the underlying values and needs
+                   - Same core values expressed differently should be ALIGNED (e.g., both valuing honesty but expressing it similarly; "tell me the truth" and "don't wait to tell me something I need to know")
+                   - Similar values with different emphasis but still comprehensive should typically be ALIGNED (e.g., both care about mind and heart but they each emphasize one vs. the other)
+                   - "DISCUSS" should identify meaningful tensions, not just any difference
+                   - HIGH_PRIORITY should be rare and limited to truly incompatible approaches
 
-                Examples:
-                - Different problem-solving styles that complement each other = ALIGNED
-                - Overlapping productive times (10AM-2PM vs 11AM-6PM) = ALIGNED  
-                - One preferring structured meetings vs one preferring action-oriented meetings = DISCUSS
-                - Someone who needs silence to work vs someone who talks constantly = HIGH PRIORITY
+                3. COMMON ASSESSMENT CORRECTIONS (learn from these examples)
+                   - Both valuing honesty/transparency = ALIGNED (even with different wording)
+                   - Both mentioning trust based on follow-through and transparency (even if only one mentions lies of omissions) = ALIGNED
+                   - Direct vs to-the-point feedback approaches = ALIGNED (similar core approach)
+                   - Direct but with kindness in feedback vs to-the-point = DISCUSS (potential for misalignment given the kindness element and uncertainty around how the other will handle)
+                   - Direct but with kindness in feedback vs to-the-point but with no sugar coating = DISCUSS (potential for misalignment given the kindness element directly contradicting the no sugar coating)
+                   - One mentioning ADHD/lateness without conflicting with other's stated needs = DISCUSS (being late is something that can bother many people, so good to confirm if it's an issue)
+                   - One mentions work-life balance and the other only about working = DISCUSS (potential source of tension)
+                   - Stress signals are rarely HIGH_PRIORITY unless fundamentally incompatible
+
+                4. FOCUS ON MEANINGFUL FRICTION:
+                   - Would one person be regularly frustrated by the other's natural working style?
+                   - Could the difference lead to recurring misunderstandings?
+                   - Are there fundamentally different expectations that would cause tension?
+                   - Is there a true values conflict vs just different expressions?
 
                 Return a JSON object with exactly these fields:
                 1. assessment: ONLY "aligned", "discuss", or "high_priority"
@@ -105,7 +121,7 @@ class TextAnalyzer:
                 4. recommendations: 1-2 specific conversation topics if needed
                 5. similarity_score: A number from 0-100 indicating alignment (higher means more similar)
 
-                IMPORTANT: Default to ALIGNED unless there's clear evidence of friction.
+                IMPORTANT: When in doubt, default to ALIGNED over DISCUSS, and DISCUSS over HIGH_PRIORITY.
                 Return ONLY valid JSON with no other text.
                 """
 

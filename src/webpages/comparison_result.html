@@ -583,7 +583,7 @@
 
                     // Count high priority conflicts
                     const highPriorityCount = result.conflict_summary.conflict_areas.filter(
-                        c => c.is_high_priority).length;
+                        c => c.assessment === "high_priority").length;
 
                     const conflictSummary = document.createElement('div');
                     conflictSummary.className = 'alert alert-warning mb-4';
