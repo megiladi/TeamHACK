@@ -149,6 +149,7 @@ python -m pytest tests/
 - Acceleration of comparison engine for user experience
 
 #### User Features
+- Refining of comparison algorithms
 - Automated discussion recommendations
 - Working norms discussion resolutions logging
 - Improved and increased triaging of conflicts by priority level
