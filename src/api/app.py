@@ -331,6 +331,16 @@ def create_completed_form():
         # Convert form data to a dictionary
         data = request.form.to_dict()
 
+        # Validate that form isn't empty
+        if not data:
+            return jsonify({"error": "Form submission cannot be empty"}), 400
+
+        # Validate that there's at least one actual question/answer field
+        # This ensures we don't count system fields like CSRF tokens as content
+        question_fields = [key for key in data.keys() if key != 'user_id' and not key.startswith('_')]
+        if not question_fields:
+            return jsonify({"error": "Form must contain at least one question response"}), 400
+
         # Use the current logged-in user instead of the form field
         user_id = current_user.id
 
