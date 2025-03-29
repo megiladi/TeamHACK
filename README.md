@@ -79,7 +79,7 @@ TeamHACK/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/username/TeamHACK.git
+   git clone https://github.com/megiladi/TeamHACK.git
    cd TeamHACK
    ```
 
@@ -114,7 +114,7 @@ TeamHACK/
 
 6. **Run the application**
    ```bash
-   python src/api/app.py
+   python -m src.api.app
    ```
 
 7. **Access the application**
@@ -141,6 +141,7 @@ python -m pytest tests/
 ## Future Potential Enhancements
 
 #### Scaling and Efficiency
+- Make Gemini AI key so that users without a key can use
 - Clean app.py file to break out into more modular architecture (i.e., blueprints and services)
 - Cloud-based storage for remote form completion
 - Dynamic form handling to enable the underlying form template to be changed
@@ -149,6 +150,7 @@ python -m pytest tests/
 - Acceleration of comparison engine for user experience
 
 #### User Features
+- Enable multiple LLM options for comparison
 - Refining of comparison algorithms
 - Automated discussion recommendations
 - Working norms discussion resolutions logging
