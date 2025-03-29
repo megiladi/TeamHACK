@@ -109,7 +109,7 @@ TeamHACK/
 
 5. **Initialize the database**
    ```bash
-   python setup/setup_database.py
+   python -m setup.setup_database
    ```
 
 6. **Run the application**
